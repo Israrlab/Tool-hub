@@ -1,8 +1,28 @@
+/*
+ * ============================================================
+ *  IsrarLab Multi HTML Viewer
+ *  Live Preview Multiple HTML Codes Online
+ * ============================================================
+ *  Author / Coded by : Israr Ahmad / Israr Lab (Techno Israr)
+ *  Official Website  : https://www.technoisrar.in
+ *  Tool Page         : https://israrlabmultihtmlviewer.blogspot.com/
+ * ============================================================
+ *  Combined single JavaScript file for easy GitHub / hosting
+ *  All original inline scripts merged into one clean file
+ *  Optimized for mobile (no hang from huge single HTML)
+ * ============================================================
+ */
 
-
-
-
-
+//<![CDATA[
+  (function() {
+    var url = window.location.href;
+    if (url.indexOf("?m=1") !== -1 || url.indexOf("&m=1") !== -1) {
+      var cleanUrl = url.replace("?m=1", "").replace("&m=1", "").replace("?m=0", "").replace("&m=0", "");
+      if (cleanUrl.endsWith("?")) { cleanUrl = cleanUrl.slice(0, -1); }
+      window.history.replaceState(null, null, cleanUrl);
+    }
+  })();
+  //]]>
 
 /* ========== PERSISTENT STORAGE (IndexedDB + localStorage) ========== */
 const ISRAR_DB_NAME = 'IsrarLabMultiHtmlViewerDB';
@@ -198,6 +218,7 @@ let currentSortMode = localStorage.getItem('israr_html_sortmode') || 'newest';
 
 function saveData() {
   try {
+    try { if (typeof invalidateRecoveryCache === 'function') invalidateRecoveryCache(); } catch (e) {}
     if (!Array.isArray(notes)) notes = [];
     if (!Array.isArray(historyLogs)) historyLogs = [];
     if (!Array.isArray(trashNotes)) trashNotes = [];
@@ -355,12 +376,12 @@ function startLiveClock() {
 
 function pushSubviewState(name) {
   try {
+    /* Only ONE history entry for any subview — prevents multi-Back jerk */
     if (!window.__israrInSubview) {
-      history.pushState({ view: name || 'sub' }, '');
+      history.pushState({ view: name || 'sub', israr: 1 }, '');
       window.__israrInSubview = true;
     } else {
-      /* Replace current subview state instead of stacking */
-      history.replaceState({ view: name || 'sub' }, '');
+      history.replaceState({ view: name || 'sub', israr: 1 }, '');
     }
   } catch (e) {}
 }
@@ -387,9 +408,31 @@ function setHomeChromeVisible(show) {
 }
 
 function showHomeDirectly() {
+  /* Anti-jank: if already fully on home, skip heavy work */
+  var alreadyHome = false;
+  try {
+    var hv = document.getElementById('homeView');
+    var ed = document.getElementById('editorView');
+    var pv = document.getElementById('fullHtmlView');
+    alreadyHome = hv && hv.style.display === 'flex'
+      && (!ed || ed.style.display === 'none')
+      && (!pv || pv.style.display === 'none')
+      && !window.__israrInSubview;
+  } catch (e) {}
+
+  var wasSubview = !!window.__israrInSubview;
   window.__israrInSubview = false;
+
+  /* Collapse history so next browser-Back leaves the site (no multi-Back jerk) */
+  try {
+    if (wasSubview) {
+      history.replaceState({ view: 'home', israr: 0 }, '');
+    }
+  } catch (e) {}
+
+  if (alreadyHome) return;
+
   setHomeChromeVisible(true);
-  /* Unlock page scroll */
   try {
     var y = window.__israrReturnScrollY || 0;
     document.documentElement.style.overflow = '';
@@ -397,45 +440,48 @@ function showHomeDirectly() {
     document.body.style.position = '';
     document.body.style.width = '';
     document.body.style.top = '';
-    window.scrollTo(0, y);
   } catch (e) {}
   if (clockInterval) clearInterval(clockInterval);
-  document.getElementById('editorView').style.display = 'none';
-  document.getElementById('recoveryView').style.display = 'none';
-  document.getElementById('backupView').style.display = 'none';
-  document.getElementById('categorySettingsPageView').style.display = 'none';
-  document.getElementById('secureLockView').style.display = 'none';
-  document.getElementById('fullHtmlView').style.display = 'none';
-  document.getElementById('settingsModal').style.display = 'none';
-  document.getElementById('sortMenuModal').style.display = 'none';
-  document.getElementById('modeChangeModal').style.display = 'none';
-  document.getElementById('allDeleteAuthModal').style.display = 'none';
-  document.getElementById('homeView').style.display = 'flex';
-  
-  var histSection = document.querySelector('.external-history-section');
-  if (histSection) histSection.style.display = 'block';
-  var artSection = document.querySelector('.article-section');
-  if (artSection) artSection.style.display = 'block';
-  var relatedSec = document.getElementById('israr-lab-related-section');
-  if (relatedSec) relatedSec.style.display = 'block';
-  var hero = document.querySelector('.hero');
-  if (hero) hero.style.display = 'block';
-  var footer = document.querySelector('.main-footer');
-  if (footer) footer.style.display = 'block';
-  try { applyDarkModeState(); } catch(e) {}
-  try { renderCategories(); } catch(e) {}
-  const returnY = Number(window.__israrReturnScrollY || 0);
-  requestAnimationFrame(function(){ requestAnimationFrame(function(){ window.scrollTo(0, returnY); }); });
-  /* Smooth return: only rebuild cards if container empty or forced */
-  setTimeout(function(){
+
+  var hideIds = ['editorView','recoveryView','backupView','categorySettingsPageView','secureLockView','fullHtmlView','settingsModal','sortMenuModal','modeChangeModal','allDeleteAuthModal'];
+  for (var i = 0; i < hideIds.length; i++) {
+    try {
+      var el = document.getElementById(hideIds[i]);
+      if (el && el.style.display !== 'none') el.style.display = 'none';
+    } catch (e) {}
+  }
+  try {
+    var home = document.getElementById('homeView');
+    if (home) home.style.display = 'flex';
+  } catch (e) {}
+
+  try {
+    var histSection = document.querySelector('.external-history-section');
+    if (histSection) histSection.style.display = 'block';
+    var artSection = document.querySelector('.article-section');
+    if (artSection) artSection.style.display = 'block';
+    var relatedSec = document.getElementById('israr-lab-related-section');
+    if (relatedSec) relatedSec.style.display = 'block';
+    var hero = document.querySelector('.hero');
+    if (hero) hero.style.display = 'block';
+    var footer = document.querySelector('.main-footer');
+    if (footer) footer.style.display = 'block';
+  } catch (e) {}
+
+  var returnY = Number(window.__israrReturnScrollY || 0);
+  requestAnimationFrame(function () {
+    try { window.scrollTo(0, returnY); } catch (e) {}
+  });
+
+  /* Only rebuild cards if needed — avoids jank on every Back */
+  setTimeout(function () {
     try {
       var c = document.getElementById('notesContainer');
       var need = !c || !c.querySelector('.note-card') || window.__israrForceNotesRender;
       window.__israrForceNotesRender = false;
       if (need && typeof renderNotes === 'function') renderNotes();
-    } catch(e) { try { renderNotes(); } catch(_){} }
-    try { if (typeof renderExternalHistoryLogs === 'function') renderExternalHistoryLogs(); } catch(e) {}
-  }, 16);
+    } catch (e) {}
+  }, 20);
 }
 
 function navigateBack() {
@@ -1678,25 +1724,25 @@ function closeFullHtmlView() {
 /* One-level history: subview -> home on Back. Home Back leaves site (no trap). */
 window.__israrInSubview = false;
 window.addEventListener('popstate', function(event) {
-  const editorVisible = document.getElementById('editorView') && document.getElementById('editorView').style.display === 'flex';
-  const previewVisible = document.getElementById('fullHtmlView') && document.getElementById('fullHtmlView').style.display === 'flex';
-  const backupVisible = document.getElementById('backupView') && document.getElementById('backupView').style.display === 'flex';
-  const recoveryVisible = document.getElementById('recoveryView') && document.getElementById('recoveryView').style.display === 'flex';
-  const catSetVisible = document.getElementById('categorySettingsPageView') && document.getElementById('categorySettingsPageView').style.display === 'flex';
-  const lockViewVisible = document.getElementById('secureLockView') && document.getElementById('secureLockView').style.display === 'flex';
-  const settingsModalVisible = document.getElementById('settingsModal') && document.getElementById('settingsModal').style.display === 'flex';
-  const anySubview = editorVisible || previewVisible || backupVisible || recoveryVisible || catSetVisible || lockViewVisible || settingsModalVisible;
+  var editorVisible = document.getElementById('editorView') && document.getElementById('editorView').style.display === 'flex';
+  var previewVisible = document.getElementById('fullHtmlView') && document.getElementById('fullHtmlView').style.display === 'flex';
+  var backupVisible = document.getElementById('backupView') && document.getElementById('backupView').style.display === 'flex';
+  var recoveryVisible = document.getElementById('recoveryView') && document.getElementById('recoveryView').style.display === 'flex';
+  var catSetVisible = document.getElementById('categorySettingsPageView') && document.getElementById('categorySettingsPageView').style.display === 'flex';
+  var lockViewVisible = document.getElementById('secureLockView') && document.getElementById('secureLockView').style.display === 'flex';
+  var settingsModalVisible = document.getElementById('settingsModal') && document.getElementById('settingsModal').style.display === 'flex';
+  var anySubview = editorVisible || previewVisible || backupVisible || recoveryVisible || catSetVisible || lockViewVisible || settingsModalVisible;
 
   if (anySubview || window.__israrInSubview) {
     window.isCreatingNewNote = false;
     window.editingNoteId = null;
-    editingIndex = null;
+    try { editingIndex = null; } catch (e) {}
     window.__israrInSubview = false;
     try { showHomeDirectly(); } catch (e) {}
-    /* Do NOT pushState again — one Back from home exits the page */
+    /* replaceState already done inside showHomeDirectly — next Back exits */
     return;
   }
-  /* Already on home: allow browser to leave */
+  /* Already on home with clean history: browser leaves the page normally */
 });
 
 
@@ -2590,27 +2636,52 @@ function restoreTrashNote(index) {
   alert("कोड Trash से Main List और History में Restore हो गया!");
 }
 
+
+function invalidateRecoveryCache() {
+  try {
+    var c = document.getElementById('recoveryContainer');
+    if (c) c.removeAttribute('data-cache-key');
+  } catch (e) {}
+}
+
 function openRecoveryView() {
   setHomeChromeVisible(false);
   try { pushSubviewState('recovery'); } catch (e) {}
-  document.getElementById('homeView').style.display = 'none';
-  var editor = document.getElementById('editorView'); if (editor) editor.style.display = 'none';
-  var bak = document.getElementById('backupView'); if (bak) bak.style.display = 'none';
-  var vault = document.getElementById('secureLockView'); if (vault) vault.style.display = 'none';
+  try { document.getElementById('homeView').style.display = 'none'; } catch (e) {}
+  try { var editor = document.getElementById('editorView'); if (editor) editor.style.display = 'none'; } catch (e) {}
+  try { var bak = document.getElementById('backupView'); if (bak) bak.style.display = 'none'; } catch (e) {}
+  try { var vault = document.getElementById('secureLockView'); if (vault) vault.style.display = 'none'; } catch (e) {}
   var rec = document.getElementById('recoveryView');
+  if (!rec) return;
+  /* Show instantly — no blank flash */
   rec.style.display = 'flex';
   rec.style.pointerEvents = 'auto';
   rec.style.zIndex = '1000010';
+
   var c = document.getElementById('recoveryContainer');
   if (!c) return;
+
+  /* Cache key: skip full rebuild if trash list unchanged (stops Recovery jank) */
+  var cacheKey = trashNotes.length + '|' + trashNotes.map(function(n){
+    return (n.id || '') + ':' + (n.updatedAt || n.createdAtStr || '') + ':' + ((n.htmlCode||'').length);
+  }).join(',');
+  if (c.getAttribute('data-cache-key') === cacheKey && c.querySelector('.note-card')) {
+    /* Already rendered — just show, no re-download / re-iframe */
+    return;
+  }
+  c.setAttribute('data-cache-key', cacheKey);
+
   if (!trashNotes.length) {
     c.innerHTML = '<div class="empty-notes"><p>Trash is empty. Deleted home cards will appear here.</p></div>';
     return;
   }
-  c.innerHTML = '';
+
+  /* Build cards off-DOM then one append (smoother) */
+  var frag = document.createDocumentFragment();
   trashNotes.forEach(function(n, i) {
-    var charCount = (n.htmlCode || '').length;
-    var wordCount = !(n.htmlCode || '').trim() ? 0 : (n.htmlCode || '').trim().split(/\s+/).length;
+    var code = n.htmlCode || '';
+    var charCount = code.length;
+    var wordCount = !code.trim() ? 0 : code.trim().split(/\s+/).length;
     var title = (n.title || 'Untitled Code').replace(/</g, '&lt;').replace(/"/g, '&quot;');
     var dateStr = n.updatedAt || n.createdAtStr || '';
     var card = document.createElement('div');
@@ -2635,12 +2706,17 @@ function openRecoveryView() {
       '</div>';
     var iframe = card.querySelector('iframe');
     if (iframe) {
-      iframe.__previewCode = n.htmlCode || '';
+      iframe.__previewCode = code;
       iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-modals');
     }
-    c.appendChild(card);
+    frag.appendChild(card);
   });
-  if (typeof scheduleLazyCardPreviews === 'function') scheduleLazyCardPreviews(c);
+  c.innerHTML = '';
+  c.appendChild(frag);
+  /* Defer heavy iframe previews so UI feels instant */
+  setTimeout(function(){
+    try { if (typeof scheduleLazyCardPreviews === 'function') scheduleLazyCardPreviews(c); } catch (e) {}
+  }, 80);
 }
 
 function openTrashNotePreview(index) {
@@ -3156,9 +3232,7 @@ filterRelatedTools(false);
 function escapeHtml(str) {
   return String(str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
-</script>
 
-<script>
 (function(){
   /* Fast editor: never highlight on every keystroke. Colors paint after idle. */
   var paintQueued = false;
@@ -3299,58 +3373,8 @@ function escapeHtml(str) {
   else bind();
   window.addEventListener('load',bind);
 })();
-</script>
 
-
-<style id="editor-topbar-screenshot-style">
-/* Compact mobile editor header matching the supplied reference screenshot. */
-#editorView .editor-top-bar{padding:12px 14px 10px!important;background:var(--header-bg)!important;border-bottom:1px solid var(--border)!important;display:flex!important;flex-direction:column!important;gap:7px!important;flex-shrink:0!important}
-#editorView .editor-top-row1{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto auto!important;align-items:center!important;gap:7px!important;flex-wrap:nowrap!important;width:100%!important}
-#editorView .editor-top-row1 .top-btn{min-width:0!important;white-space:nowrap!important;border-radius:12px!important;font-size:12px!important;height:44px!important;padding:0 12px!important}
-#editorView #statsInfo{min-width:0!important;text-align:center!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;font-size:11px!important;padding:12px 8px!important;border:1px solid var(--border)!important;border-radius:10px!important;background:rgba(128,128,128,.06)!important;color:var(--muted)!important}
-#editorView #saveIndicatorText{white-space:nowrap!important;font-size:12px!important;font-weight:700!important;color:var(--green)!important;padding:0 2px!important}
-#editorView #editorSaveUpdateBtn{height:44px!important;min-width:76px!important;padding:0 15px!important;border:0!important;border-radius:13px!important;background:var(--cyan)!important;color:#031018!important;font-size:13px!important;font-weight:800!important;white-space:nowrap!important}
-#editorView .editor-top-row2{display:flex!important;justify-content:flex-start!important;align-items:center!important;min-height:18px!important;flex-wrap:nowrap!important}
-#editorView #liveDateTime{font-size:12px!important;font-weight:600!important;color:var(--muted)!important;white-space:nowrap!important}
-@media(max-width:390px){#editorView .editor-top-bar{padding:10px 10px 9px!important}#editorView .editor-top-row1{grid-template-columns:auto minmax(0,1fr) auto auto!important;gap:5px!important}#editorView .editor-top-row1 .top-btn{padding:0 9px!important;font-size:11px!important}#editorView #statsInfo{font-size:10px!important;padding:11px 5px!important}#editorView #saveIndicatorText{font-size:11px!important}#editorView #editorSaveUpdateBtn{min-width:65px!important;padding:0 10px!important;font-size:12px!important}}
-</style>
-
-<style id="editor-top-buttons-not-hidden-fix">
-/* Keep the editor view above the site's fixed header so its top controls never sit underneath it. */
-#editorView{z-index:1000001!important;position:fixed!important;top:0!important;left:0!important;right:0!important;width:100vw!important;height:100dvh!important;max-height:100dvh!important;overflow:hidden!important;padding-top:env(safe-area-inset-top,0px)!important;box-sizing:border-box!important;}
-#editorView .editor-top-bar{position:relative!important;top:auto!important;left:auto!important;right:auto!important;z-index:1000002!important;visibility:visible!important;opacity:1!important;flex-shrink:0!important;margin-top:0!important;}
-#editorView .editor-top-row1,#editorView .editor-top-row2{position:relative!important;z-index:1000003!important;}
-#editorView .editor-top-row1 .top-btn,#editorView #statsInfo,#editorView #saveIndicatorText{position:relative!important;z-index:1000004!important;visibility:visible!important;opacity:1!important;}
-/* Ensure editor content scrolls below the toolbar rather than over it. */
-#editorView .editor-body{position:relative!important;z-index:1!important;min-height:0!important;flex:1 1 auto!important;overflow:hidden!important;}
-</style>
-
-<style id="editor-top-row-visible-final-fix">
-/* The website's sticky main header was covering the first editor toolbar row on mobile.
-   Put the live date first and the action buttons immediately beneath it, in normal flow. */
-#editorView .editor-top-bar{display:flex!important;flex-direction:column!important;gap:8px!important;padding:10px 12px!important;overflow:visible!important;height:auto!important;min-height:0!important;}
-#editorView .editor-top-row2{order:1!important;display:flex!important;position:relative!important;inset:auto!important;transform:none!important;margin:0!important;padding:0!important;min-height:20px!important;visibility:visible!important;opacity:1!important;}
-#editorView .editor-top-row1{order:2!important;display:grid!important;position:relative!important;inset:auto!important;transform:none!important;margin:0!important;padding:0!important;width:100%!important;grid-template-columns:auto minmax(0,1fr) auto auto!important;align-items:center!important;gap:6px!important;visibility:visible!important;opacity:1!important;}
-#editorView .editor-top-row1>*{min-width:0!important;position:relative!important;visibility:visible!important;opacity:1!important;}
-#editorView .editor-top-row1 .top-btn,#editorView #statsInfo,#editorView #saveIndicatorText{display:flex!important;align-items:center!important;justify-content:center!important;visibility:visible!important;opacity:1!important;z-index:5!important;}
-#editorView .editor-top-row1 .top-btn{height:42px!important;padding:0 10px!important;font-size:12px!important;white-space:nowrap!important;}
-#editorView #statsInfo{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;padding:8px 5px!important;font-size:10px!important;}
-#editorView #editorSaveUpdateBtn{min-width:64px!important;padding:0 10px!important;}
-#editorView .editor-body{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;}
-@media(max-width:380px){#editorView .editor-top-bar{padding-left:8px!important;padding-right:8px!important}#editorView .editor-top-row1{grid-template-columns:auto minmax(0,1fr) auto auto!important;gap:4px!important}#editorView .editor-top-row1 .top-btn{padding:0 7px!important;font-size:11px!important}#editorView #statsInfo{font-size:9px!important;padding:7px 3px!important}#editorView #saveIndicatorText{font-size:10px!important}}
-</style>
-
-<style id="final-header-clearance-and-paste-fix">
-/* Place editor controls below the site's fixed header so they are never covered. */
-#editorView{top:96px!important;height:calc(100dvh - 96px)!important;max-height:calc(100dvh - 96px)!important;padding-top:0!important;box-sizing:border-box!important;}
-#editorView .editor-top-bar{position:relative!important;z-index:100!important;flex-shrink:0!important;margin:0!important;}
-#editorView .editor-top-row2,#editorView .editor-top-row1{position:relative!important;z-index:101!important;}
-#editorView .editor-body{min-height:0!important;overflow:hidden!important;}
-#editorView .code-editor-wrapper{min-height:0!important;overflow:hidden!important;}
-#editorView #htmlCodeInput{overflow-y:auto!important;overflow-x:hidden!important;white-space:pre!important;overflow-wrap:anywhere!important;word-break:break-word!important;}
-@media(max-width:420px){#editorView{top:96px!important;height:calc(100dvh - 96px)!important;max-height:calc(100dvh - 96px)!important;}}
-</style>
-<script id="final-full-paste-and-scroll-sync">
+/* ----- script id: final-full-paste-and-scroll-sync ----- */
 (function(){
  function bindEditorFix(){
   const ta=document.getElementById('htmlCodeInput');
@@ -3376,60 +3400,8 @@ function escapeHtml(str) {
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindEditorFix);else bindEditorFix();
  window.addEventListener('load',bindEditorFix);
 })();
-</script>
 
-<style id="editor-one-line-toolbar-fixed-size">
-#editorView{z-index:1000001!important;position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-height:100dvh!important;overflow:hidden!important;box-sizing:border-box!important;}
-#editorView .editor-top-bar{padding:8px 10px!important;gap:0!important;flex:0 0 auto!important;position:relative!important;z-index:10!important;}
-#editorView .editor-top-row1{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto auto!important;align-items:center!important;gap:6px!important;flex-wrap:nowrap!important;width:100%!important;}
-#editorView .editor-top-row1>*{min-width:0!important;max-width:100%!important;}
-#editorView .editor-top-row1 .editor-back-btn,#editorView .editor-top-row1 .editor-preview-btn,#editorView #editorSaveUpdateBtn{height:40px!important;min-width:0!important;padding:0 9px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;white-space:nowrap!important;font-size:11px!important;border-radius:10px!important;}
-#editorView #statsInfo{min-width:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;text-align:center!important;font-size:10px!important;padding:8px 4px!important;}
-#editorView #editorSaveUpdateBtn{background:var(--theme-accent,var(--cyan))!important;color:#061018!important;font-weight:800!important;}
-#editorView .editor-top-row2{display:none!important;}
-#editorView .editor-body{display:flex!important;flex-direction:column!important;gap:8px!important;flex:1 1 auto!important;min-height:0!important;overflow:hidden!important;padding:10px 14px!important;}
-#editorView .title-input,#editorView .code-search-bar,#editorView .quick-toolbar{flex:0 0 auto!important;}
-#editorView .editor-body>div[style*="flex-direction:column"]{display:flex!important;flex:1 1 0!important;min-height:0!important;overflow:hidden!important;}
-#editorView .code-editor-wrapper{flex:1 1 auto!important;height:100%!important;min-height:0!important;max-height:none!important;overflow:hidden!important;}
-#editorView .editor-input-area{flex:1 1 0!important;min-width:0!important;min-height:0!important;height:100%!important;overflow:hidden!important;}
-#editorView #htmlCodeInput{height:100%!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;}
-@media(max-width:390px){#editorView .editor-top-bar{padding:7px 7px!important}#editorView .editor-top-row1{gap:4px!important;grid-template-columns:auto minmax(0,1fr) auto auto!important}#editorView .editor-top-row1 .editor-back-btn,#editorView .editor-top-row1 .editor-preview-btn,#editorView #editorSaveUpdateBtn{padding:0 6px!important;font-size:10px!important;height:38px!important}#editorView #statsInfo{font-size:9px!important;padding:7px 2px!important}}
-</style>
-
-<style id="israrlab-professional-ui-fixes">
-/* Requested layout: four equal buttons on row one, five equal buttons on row two, larger cards. */
-.header-btn-row{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;width:100%!important;}
-.header-btn-row .hdr-btn{width:100%!important;min-width:0!important;white-space:nowrap!important;}
-.top-action-bar{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:6px!important;overflow-x:visible!important;white-space:normal!important;}
-.top-action-bar .top-btn{width:100%!important;min-width:0!important;flex:none!important;padding:0 5px!important;font-size:10px!important;white-space:nowrap!important;}
-#notesContainer{grid-template-columns:repeat(4,minmax(0,1fr))!important;max-height:none!important;gap:12px!important;}
-#notesContainer .note-card{height:350px!important;min-width:0!important;}
-#notesContainer .card-footer{padding:6px!important;}
-#notesContainer .card-footer-row{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important;}
-#notesContainer .card-footer-row button{min-width:0!important;width:100%!important;height:30px!important;padding:4px 5px!important;font-size:10px!important;white-space:nowrap!important;border-radius:7px!important;}
-#notesContainer .card-cover-box{height:150px!important;flex-shrink:0!important;}
-#notesContainer .card-body{padding:7px 9px!important;min-width:0!important;}
-#notesContainer .card-date,#notesContainer .card-stats{font-size:9px!important;}
-
-#editorView .editor-top-row1{grid-template-columns:minmax(58px,.8fr) minmax(0,1.6fr) minmax(62px,.8fr) minmax(65px,.8fr)!important;gap:5px!important;}
-#editorView .editor-top-row1 .editor-back-btn,#editorView .editor-top-row1 .editor-preview-btn,#editorView #editorSaveUpdateBtn{width:100%!important;height:40px!important;font-size:10px!important;padding:0 5px!important;}
-#editorView #statsInfo{font-size:9px!important;padding:7px 3px!important;}
-#editorView .editor-body{display:flex!important;flex-direction:column!important;min-height:0!important;overflow:hidden!important;}
-#editorView .editor-body>div[style*="flex-direction:column"]{flex:1 1 0!important;min-height:0!important;}
-#editorView .code-editor-wrapper{flex:1 1 auto!important;min-height:0!important;height:100%!important;}
-#editorView .editor-input-area{min-height:0!important;min-width:0!important;}
-#editorView #htmlCodeInput{font-size:14px!important;line-height:1.6!important;white-space:pre!important;overflow-wrap:anywhere!important;word-break:break-word!important;overflow-x:hidden!important;}
-#editorView .code-highlight-layer{white-space:pre!important;overflow-wrap:anywhere!important;word-break:break-word!important;}
-.search-hit-mark{background:#ffeb3b!important;color:#111!important;border-radius:2px!important;box-shadow:0 0 0 1px #ffeb3b!important;}
-#recoveryView .recovery-header{gap:8px!important;padding:12px!important;}
-#recoveryView .recovery-top-actions{display:flex!important;gap:6px!important;flex-wrap:wrap!important;width:100%!important;}
-#recoveryView .recovery-top-actions button{flex:1 1 auto!important;min-width:0!important;}
-.footer-social-icon,.main-footer .footer-social-icons .footer-social-icon{background:var(--theme-accent,var(--cyan))!important;background-image:none!important;color:#07111d!important;border-color:var(--theme-accent,var(--cyan))!important;}
-@media(max-width:1000px){#notesContainer{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;}#notesContainer .note-card{height:330px!important;}#notesContainer .card-cover-box{height:140px!important;} .top-action-bar .top-btn{font-size:9px!important;padding:0 3px!important;}}
-@media(max-width:420px){.header-btn-row .hdr-btn{font-size:9px!important;gap:3px!important;padding:0 2px!important}.top-action-bar{gap:4px!important;padding:8px 6px!important}.top-action-bar .top-btn{font-size:8px!important;gap:3px!important;padding:0 1px!important;}#notesContainer .note-card{height:310px!important;}#notesContainer .card-cover-box{height:125px!important;}}
-@media(max-width:360px){#editorView .editor-top-row1{grid-template-columns:55px minmax(0,1fr) 57px 60px!important;gap:3px!important;}#editorView .editor-top-row1 .editor-back-btn,#editorView .editor-top-row1 .editor-preview-btn,#editorView #editorSaveUpdateBtn{font-size:9px!important;padding:0 3px!important;}#editorView #statsInfo{font-size:8px!important;}}
-</style>
-<script id="israrlab-search-highlight-persistence-fix">
+/* ----- script id: israrlab-search-highlight-persistence-fix ----- */
 (function(){
   function getNodes(root){
     const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(n){return n.nodeValue&&n.nodeValue.length?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;}});
@@ -3512,26 +3484,8 @@ function escapeHtml(str) {
   function bindPaste(){const ta=document.getElementById('htmlCodeInput');if(!ta||ta.dataset.proPasteFix==='1')return;ta.dataset.proPasteFix='1';ta.addEventListener('paste',function(e){const clip=e.clipboardData;if(!clip)return;const value=clip.getData('text/plain');if(typeof value!=='string')return;e.preventDefault();e.stopImmediatePropagation();const start=ta.selectionStart,end=ta.selectionEnd;ta.setRangeText(value,start,end,'end');if(typeof handleEditorInput==='function')handleEditorInput();updateHighlight();},true);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindPaste);else bindPaste();window.addEventListener('load',bindPaste);
 })();
-</script>
 
-
-<style id="final-editor-usability-fix">
-/* Keep editor dimensions stable and keep the visible syntax layer aligned with the real textarea. */
-#editorView .editor-top-row1{grid-template-columns:minmax(48px,.72fr) minmax(0,1.9fr) minmax(48px,.72fr) minmax(56px,.82fr)!important;gap:4px!important}
-#editorView .editor-top-row1 .editor-back-btn,#editorView .editor-top-row1 #editorSaveUpdateBtn,#editorView .editor-top-row1 .editor-preview-btn{min-width:0!important;width:100%!important;height:34px!important;padding:0 3px!important;font-size:10px!important;gap:3px!important;box-sizing:border-box!important}
-#editorView #statsInfo{font-size:clamp(8px,2.3vw,10px)!important;letter-spacing:-.25px!important;padding:5px 1px!important;overflow:visible!important;text-overflow:clip!important;white-space:nowrap!important;line-height:1.2!important}
-#editorView .code-editor-wrapper{height:100%!important;min-height:0!important;max-height:none!important;flex:1 1 auto!important}
-#editorView .editor-input-area{height:100%!important;min-height:0!important;overflow:hidden!important}
-#editorView #htmlCodeInput,#editorView .code-highlight-layer{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace!important;font-size:14px!important;line-height:1.6!important;letter-spacing:normal!important;tab-size:2!important;white-space:pre!important;overflow-wrap:normal!important;word-break:normal!important;}
-#editorView #htmlCodeInput{overflow:auto!important;resize:none!important;}
-#editorView .code-highlight-layer{overflow:visible!important;min-width:max-content!important;}
-#editorView .quick-toolbar .quick-row{display:flex!important;gap:4px!important;align-items:stretch!important;width:100%!important}
-#editorView .quick-toolbar .quick-row .quick-btn{flex:1 1 0!important;min-width:0!important;height:34px!important;min-height:34px!important;padding:0 3px!important;font-size:11px!important;white-space:nowrap!important}
-#editorView .quick-toolbar .quick-row:nth-child(2) .editor-download-btn{flex:0 0 36px!important;width:36px!important;max-width:36px!important}
-#editorView .quick-toolbar .quick-row:nth-child(2) .quick-select{flex:1 1 0!important;min-width:0!important;height:34px!important;font-size:10px!important}
-@media(max-width:390px){#editorView .editor-top-row1{grid-template-columns:minmax(45px,.72fr) minmax(0,1.9fr) minmax(45px,.72fr) minmax(52px,.82fr)!important;gap:3px!important}#editorView .editor-top-row1 .editor-back-btn,#editorView .editor-top-row1 #editorSaveUpdateBtn,#editorView .editor-top-row1 .editor-preview-btn{font-size:9px!important;height:32px!important;padding:0 2px!important}#editorView #statsInfo{font-size:8px!important;letter-spacing:-.4px!important}#editorView .quick-toolbar .quick-row .quick-btn{font-size:10px!important;height:32px!important;min-height:32px!important}}
-</style>
-<script id="final-editor-actions-fix">
+/* ----- script id: final-editor-actions-fix ----- */
 (function(){
   const ta=()=>document.getElementById('htmlCodeInput');
   let historyStack=[],historyIndex=-1,lastValue=null,restoring=false;
@@ -3558,127 +3512,8 @@ function escapeHtml(str) {
   window.downloadEditorCode=function(){const el=ta();if(!el)return;const titleEl=document.getElementById('noteTitle');let name=(titleEl&&titleEl.value.trim())||'IsrarLab-Code';name=name.replace(/[\\/:*?"<>|]+/g,'_').trim()||'IsrarLab-Code';const blob=new Blob([el.value],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name.toLowerCase().endsWith('.html')?name:name+'.html';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();window.addEventListener('load',init);
 })();
-</script>
 
-
-<style id="user-request-editor-fixes">
-/* Editor top row: compact action buttons, more room for character/word counts */
-#editorView .editor-top-row1{display:grid!important;grid-template-columns:minmax(0,.85fr) minmax(0,1.55fr) minmax(0,.85fr) minmax(0,.85fr)!important;gap:6px!important;align-items:stretch!important;width:100%!important;flex-wrap:nowrap!important}
-#editorView .editor-top-row1 .editor-back-btn,#editorView .editor-top-row1 #editorSaveUpdateBtn,#editorView .editor-top-row1 .editor-preview-btn{width:100%!important;min-width:0!important;height:40px!important;padding:0 3px!important;display:flex!important;align-items:center!important;justify-content:center!important;white-space:nowrap!important;font-size:11px!important;box-sizing:border-box!important}
-#editorView #statsInfo{width:100%!important;min-width:0!important;box-sizing:border-box!important;padding:8px 3px!important;font-size:10px!important;text-align:center!important;overflow:visible!important;white-space:nowrap!important;letter-spacing:-.15px!important}
-#editorView .quick-toolbar .quick-row{display:flex!important;gap:5px!important;width:100%!important}
-#editorView .quick-toolbar .quick-row .quick-btn{flex:1 1 0!important;min-width:0!important}
-/* Home cards: smaller four action buttons inside each card */
-.card-footer{padding:4px 5px!important;gap:3px!important}
-.card-footer-row{grid-template-rows:repeat(2,27px)!important;gap:4px!important}
-.card-footer button{height:27px!important;min-height:27px!important;font-size:8px!important;padding:0 2px!important;gap:2px!important;border-radius:4px!important}
-/* Make the home card area taller; keep overflow scrolling inside the card area */
-.notes-container{height:1000px!important;max-height:1000px!important;overflow-y:auto!important;align-content:start!important}
-@media(max-width:640px){
-  #editorView .editor-top-row1{grid-template-columns:minmax(0,.85fr) minmax(0,1.55fr) minmax(0,.85fr) minmax(0,.85fr)!important;gap:4px!important}
-  #editorView .editor-top-row1 .editor-back-btn,#editorView .editor-top-row1 #editorSaveUpdateBtn,#editorView .editor-top-row1 .editor-preview-btn{font-size:10px!important;padding:0 2px!important;height:38px!important}
-  #editorView #statsInfo{font-size:10px!important;padding:7px 1px!important;letter-spacing:-.3px!important}
-  .notes-container{height:1000px!important;max-height:1000px!important;padding:10px!important;gap:10px!important}
-  .note-card{height:320px!important}
-  .card-footer-row{grid-template-rows:repeat(2,26px)!important;gap:3px!important}
-  .card-footer button{height:26px!important;min-height:26px!important;font-size:8px!important}
-}
-</style>
-
-
-<style id="user-request-card-spacing-fix">
-/* Remove the large blank area inside home cards and keep card actions compact. */
-#notesContainer .note-card{
-  height:auto!important;
-  min-height:0!important;
-  justify-content:flex-start!important;
-}
-#notesContainer .card-cover-box{height:82px!important;min-height:82px!important;flex:0 0 82px!important;}
-#notesContainer .card-body{flex:0 0 auto!important;min-height:0!important;padding:5px 7px!important;gap:2px!important;}
-#notesContainer .card-meta-row{font-size:8px!important;line-height:1.2!important;}
-#notesContainer .note-card h3{font-size:11px!important;line-height:1.2!important;margin:1px 0!important;}
-#notesContainer .card-footer{padding:3px 4px!important;gap:3px!important;flex:0 0 auto!important;}
-#notesContainer .card-footer-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,24px)!important;gap:4px!important;}
-#notesContainer .card-footer button{height:24px!important;min-height:24px!important;font-size:8px!important;line-height:1!important;padding:0 2px!important;border-radius:5px!important;gap:2px!important;}
-/* Compact editor header buttons while keeping the count fully visible. */
-#editorView .editor-top-row1{grid-template-columns:minmax(48px,.7fr) minmax(0,2fr) minmax(48px,.7fr) minmax(54px,.78fr)!important;gap:4px!important;}
-#editorView .editor-top-row1 .editor-back-btn,
-#editorView .editor-top-row1 #editorSaveUpdateBtn,
-#editorView .editor-top-row1 .editor-preview-btn{height:32px!important;min-height:32px!important;font-size:9px!important;padding:0 2px!important;gap:2px!important;}
-#editorView #statsInfo{font-size:9px!important;padding:4px 1px!important;letter-spacing:-.25px!important;white-space:nowrap!important;overflow:visible!important;}
-@media(max-width:640px){
-  #notesContainer{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;padding:8px!important;}
-  #notesContainer .note-card{height:auto!important;min-height:0!important;}
-  #notesContainer .card-cover-box{height:65px!important;min-height:65px!important;flex-basis:65px!important;}
-  #notesContainer .card-body{padding:4px 5px!important;}
-  #notesContainer .card-meta-row{font-size:7.5px!important;}
-  #notesContainer .note-card h3{font-size:10px!important;}
-  #notesContainer .card-footer{padding:3px!important;}
-  #notesContainer .card-footer-row{grid-template-rows:repeat(2,22px)!important;gap:3px!important;}
-  #notesContainer .card-footer button{height:22px!important;min-height:22px!important;font-size:7.5px!important;}
-  #editorView .editor-top-row1{grid-template-columns:minmax(44px,.72fr) minmax(0,1.9fr) minmax(44px,.72fr) minmax(50px,.8fr)!important;gap:3px!important;}
-  #editorView .editor-top-row1 .editor-back-btn,#editorView .editor-top-row1 #editorSaveUpdateBtn,#editorView .editor-top-row1 .editor-preview-btn{height:30px!important;font-size:8px!important;padding:0 1px!important;}
-  #editorView #statsInfo{font-size:8px!important;letter-spacing:-.35px!important;padding:3px 0!important;}
-}
-</style>
-
-<style id="final-user-preview-theme-cursor-fixes">
-/* Home-card preview: show the actual site at readable scale instead of shrinking it to half size. */
-#notesContainer .note-card{height:310px!important;min-height:310px!important;justify-content:flex-start!important;}
-#notesContainer .card-cover-box{height:118px!important;min-height:118px!important;flex:0 0 118px!important;overflow:hidden!important;background:#fff!important;}
-#notesContainer .html-preview-wrapper{width:222%!important;height:222%!important;transform:scale(0.45)!important;transform-origin:top left!important;pointer-events:auto!important;background:transparent!important;}
-#notesContainer .html-preview-wrapper iframe{display:block!important;width:100%!important;height:100%!important;border:0!important;background:#fff!important;}
-#notesContainer .card-body{flex:1 1 auto!important;min-height:0!important;padding:6px 7px!important;gap:3px!important;}
-#notesContainer .card-footer{flex:0 0 auto!important;padding:5px!important;}
-#notesContainer .card-footer-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,28px)!important;gap:5px!important;}
-#notesContainer .card-footer button{height:28px!important;min-height:28px!important;font-size:9px!important;border-radius:7px!important;padding:0 3px!important;}
-@media(max-width:640px){
- #notesContainer .note-card{height:300px!important;min-height:300px!important;}
- #notesContainer .card-cover-box{height:105px!important;min-height:105px!important;flex-basis:105px!important;}
- #notesContainer .card-footer-row{grid-template-rows:repeat(2,26px)!important;gap:4px!important;}
- #notesContainer .card-footer button{height:26px!important;min-height:26px!important;font-size:8.5px!important;}
-}
-/* Keep typed characters, visible syntax layer, and line numbers on the exact same lines. */
-#editorView .code-editor-wrapper{position:relative!important;overflow:hidden!important;min-height:0!important;}
-#editorView .line-numbers,
-#editorView #htmlCodeInput,
-#editorView .code-highlight-layer,
-#editorView .code-highlight-layer code{
- font-family:Consolas,Monaco,"Courier New",monospace!important;
- font-size:14px!important;font-weight:600!important;line-height:1.6!important;
- letter-spacing:normal!important;tab-size:2!important;
- white-space:pre!important;word-break:normal!important;overflow-wrap:normal!important;
- font-variant-ligatures:none!important;
-}
-#editorView .line-numbers{padding-top:12px!important;box-sizing:border-box!important;}
-#editorView .editor-input-area{position:relative!important;overflow:hidden!important;min-width:0!important;}
-#editorView .code-highlight-layer{position:absolute!important;top:0!important;left:0!important;right:auto!important;bottom:auto!important;
- width:100%!important;height:100%!important;min-height:100%!important;margin:0!important;padding:12px!important;
- overflow:hidden!important;box-sizing:border-box!important;pointer-events:none!important;z-index:1!important;
- background:#0d1117!important;color:#e6edf3!important;}
-#editorView .code-highlight-layer code{display:block!important;padding:0!important;margin:0!important;background:transparent!important;}
-#editorView #htmlCodeInput{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
- margin:0!important;padding:12px!important;box-sizing:border-box!important;resize:none!important;overflow:auto!important;
- white-space:pre!important;background:transparent!important;color:transparent!important;
- -webkit-text-fill-color:transparent!important;caret-color:#58a6ff!important;z-index:2!important;}
-#editorView .editor-input-area.syntax-ready #htmlCodeInput{color:transparent!important;-webkit-text-fill-color:transparent!important;}
-#editorView #htmlCodeInput::selection{-webkit-text-fill-color:transparent!important;background:rgba(88,166,255,.30)!important;}
-/* In light mode, keep the code pane light while preserving colored HTML/CSS/JS tokens. */
-body.light-mode #editorView .code-highlight-layer{background:#ffffff!important;color:#24292f!important;}
-body.light-mode #editorView #htmlCodeInput{caret-color:#0969da!important;}
-body.light-mode #editorView .code-highlight-layer .hljs-tag,
-body.light-mode #editorView .code-highlight-layer .hljs-name{color:#0550ae!important;}
-body.light-mode #editorView .code-highlight-layer .hljs-attr{color:#8250df!important;}
-body.light-mode #editorView .code-highlight-layer .hljs-string{color:#0a3069!important;}
-body.light-mode #editorView .code-highlight-layer .hljs-keyword,
-body.light-mode #editorView .code-highlight-layer .hljs-selector-tag{color:#cf222e!important;}
-body.light-mode #editorView .code-highlight-layer .hljs-number,
-body.light-mode #editorView .code-highlight-layer .hljs-literal{color:#0550ae!important;}
-body.light-mode #editorView .code-highlight-layer .hljs-comment{color:#6e7781!important;font-style:italic!important;}
-body.light-mode #editorView .code-highlight-layer .hljs-title,
-body.light-mode #editorView .code-highlight-layer .hljs-function{color:#8250df!important;}
-</style>
-<script id="final-cursor-and-scroll-alignment-fix">
+/* ----- script id: final-cursor-and-scroll-alignment-fix ----- */
 (function(){
  function align(){
   const ta=document.getElementById('htmlCodeInput');
@@ -3701,28 +3536,8 @@ body.light-mode #editorView .code-highlight-layer .hljs-function{color:#8250df!i
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',align);else align();
  window.addEventListener('load',align);
 })();
-</script>
 
-<style id="requested-search-update-card-preview-fix">
-/* All search matches stay yellow; the currently selected match turns red. */
-#editorView mark.search-hit-mark{background:#ffeb3b!important;color:#111!important;border-radius:2px!important;box-shadow:0 0 0 1px #ffeb3b!important;}
-#editorView mark.search-hit-mark.search-hit-active{background:#ff3030!important;color:#fff!important;box-shadow:0 0 0 1px #ff3030!important;}
-/* Show a larger, miniature website viewport in each home card without adding blank filler. */
-#notesContainer .note-card{height:auto!important;min-height:0!important;justify-content:flex-start!important;}
-#notesContainer .card-cover-box{height:150px!important;min-height:150px!important;flex:0 0 150px!important;overflow:hidden!important;background:#fff!important;}
-#notesContainer .html-preview-wrapper{width:200%!important;height:200%!important;transform:scale(.5)!important;transform-origin:top left!important;pointer-events:auto!important;background:transparent!important;}
-#notesContainer .html-preview-wrapper iframe{display:block!important;width:100%!important;height:100%!important;border:0!important;background:#fff!important;}
-#notesContainer .card-body{flex:0 0 auto!important;min-height:0!important;padding:6px 7px!important;gap:3px!important;}
-#notesContainer .card-footer{flex:0 0 auto!important;padding:5px!important;}
-#notesContainer .card-footer-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,28px)!important;gap:5px!important;}
-#notesContainer .card-footer button{height:28px!important;min-height:28px!important;font-size:9px!important;border-radius:7px!important;padding:0 3px!important;}
-@media(max-width:640px){
- #notesContainer .card-cover-box{height:140px!important;min-height:140px!important;flex-basis:140px!important;}
- #notesContainer .card-footer-row{grid-template-rows:repeat(2,26px)!important;gap:4px!important;}
- #notesContainer .card-footer button{height:26px!important;min-height:26px!important;font-size:8.5px!important;}
-}
-</style>
-<script id="requested-save-return-home-fix">
+/* ----- script id: requested-save-return-home-fix ----- */
 function saveAndReturnHome(){
   var ok = false;
   try { ok = executeAutoSave(); } catch (e) { console.error(e); }
@@ -3760,171 +3575,8 @@ function saveAndReturnHome(){
   } catch (e) {}
   goHome();
 }
-</script>
 
-
-<style id="final-darkmode-card-preview-scroll-fix">
-/* ===== Dark / Light reliability ===== */
-body.light-mode{
-  --bg:#ffffff !important;
-  --panel-bg:#ffffff !important;
-  --home-bg:#ffffff !important;
-  --header-bg:#ffffff !important;
-  --action-bar-bg:#ffffff !important;
-  --card-bg:#ffffff !important;
-  --card-footer-bg:#ffffff !important;
-  --text:#0f172a !important;
-  --muted:#475467 !important;
-  --border:rgba(0,0,0,.12) !important;
-}
-
-/* ===== Title strip spacing ===== */
-.israrlab-title-strip{
-  height:52px !important;
-  min-height:52px !important;
-  padding:0 14px !important;
-}
-.wrapper{padding-top:64px !important;}
-@media(max-width:640px){
-  .israrlab-title-strip{height:48px !important;min-height:48px !important;}
-  .wrapper{padding-top:58px !important;}
-}
-#homeView .app-header{padding:8px 10px !important;}
-#homeView .top-action-bar{padding:8px 10px !important;}
-#homeView .category-bar-wrapper{padding:6px 10px !important;min-height:42px !important;}
-
-/* ===== Settings / Sort / Mode modals above fixed header ===== */
-#settingsModal,
-#sortMenuModal,
-#modeChangeModal,
-#lockPromptModal,
-#newCategoryModal,
-#forgotCaptchaModal,
-#newPatternSetModal,
-#allDeleteAuthModal{
-  z-index:1000010 !important;
-}
-
-/* ===== Cards container: 2 per row, ~4 visible, then internal scroll ===== */
-#notesContainer.notes-container,
-#notesContainer{
-  display:grid !important;
-  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-  gap:12px !important;
-  padding:12px !important;
-  align-content:start !important;
-  overflow-x:hidden !important;
-  overflow-y:auto !important;
-  -webkit-overflow-scrolling:touch !important;
-  height:680px !important;
-  max-height:680px !important;
-  min-height:320px !important;
-  box-sizing:border-box !important;
-}
-/* List mode must win over the 2-col grid */
-#notesContainer.list-mode,
-#notesContainer.notes-container.list-mode{
-  grid-template-columns:1fr !important;
-}
-@media(min-width:1100px){
-  #notesContainer:not(.list-mode){
-    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-  }
-}
-@media(max-width:640px){
-  #notesContainer{
-    height:620px !important;
-    max-height:620px !important;
-    gap:10px !important;
-    padding:10px !important;
-  }
-}
-
-/* ===== Card layout: proper width, not thin ===== */
-#notesContainer .note-card{
-  width:100% !important;
-  min-width:0 !important;
-  max-width:100% !important;
-  height:auto !important;
-  min-height:0 !important;
-  display:flex !important;
-  flex-direction:column !important;
-  justify-content:flex-start !important;
-  box-sizing:border-box !important;
-}
-#notesContainer.list-mode .note-card{
-  width:100% !important;
-}
-
-#notesContainer .card-cover-box{
-  height:150px !important;
-  min-height:150px !important;
-  flex:0 0 150px !important;
-  overflow:hidden !important;
-  background:#ffffff !important;
-  position:relative !important;
-  border-bottom:1px solid var(--border) !important;
-}
-@media(max-width:640px){
-  #notesContainer .card-cover-box{
-    height:140px !important;
-    min-height:140px !important;
-    flex-basis:140px !important;
-  }
-}
-
-/* Mobile-like preview – readable scale, interactive */
-#notesContainer .html-preview-wrapper{
-  width:222% !important;
-  height:222% !important;
-  transform:scale(0.45) !important;
-  transform-origin:top left !important;
-  pointer-events:auto !important;
-  background:#ffffff !important;
-  overflow:auto !important;
-  -webkit-overflow-scrolling:touch !important;
-}
-#notesContainer .html-preview-wrapper iframe{
-  display:block !important;
-  width:100% !important;
-  height:100% !important;
-  min-height:100% !important;
-  border:0 !important;
-  background:#ffffff !important;
-  pointer-events:auto !important;
-}
-
-#notesContainer .card-body{
-  flex:0 0 auto !important;
-  min-height:0 !important;
-  padding:7px 9px !important;
-  gap:3px !important;
-}
-#notesContainer .card-meta-row{font-size:9px !important;}
-#notesContainer .note-card h3{font-size:12px !important;margin:2px 0 !important;}
-#notesContainer .card-footer{
-  flex:0 0 auto !important;
-  padding:6px !important;
-  gap:4px !important;
-}
-#notesContainer .card-footer-row{
-  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-  grid-template-rows:repeat(2,30px) !important;
-  gap:5px !important;
-}
-#notesContainer .card-footer button{
-  height:30px !important;
-  min-height:30px !important;
-  font-size:9.5px !important;
-  border-radius:6px !important;
-  padding:0 4px !important;
-}
-@media(max-width:640px){
-  #notesContainer .card-footer-row{grid-template-rows:repeat(2,28px) !important;gap:4px !important;}
-  #notesContainer .card-footer button{height:28px !important;min-height:28px !important;font-size:9px !important;}
-}
-</style>
-<script id="final-darkmode-home-reapply-fix">
+/* ----- script id: final-darkmode-home-reapply-fix ----- */
 (function(){
   /* Re-apply dark/light every time home is shown + on load */
   function reapply(){
@@ -3960,10 +3612,8 @@ body.light-mode{
     if(tries > 40) clearInterval(iv);
   }, 100);
 })();
-</script>
 
-
-<script id="final-layout-sort-sync-fix">
+/* ----- script id: final-layout-sort-sync-fix ----- */
 (function(){
   function syncLayoutStatus(){
     try{
@@ -3980,136 +3630,8 @@ body.light-mode{
   else syncLayoutStatus();
   window.addEventListener('load', syncLayoutStatus);
 })();
-</script>
 
-
-<style id="new-card-cta-style">
-/* New Card CTA - same highlight style as New Category */
-.top-btn.new-card-main-btn{
-  background:var(--cyan) !important;
-  color:#03050b !important;
-  border-color:var(--cyan) !important;
-  font-weight:800 !important;
-}
-.top-btn.new-card-main-btn:hover{
-  filter:brightness(1.08);
-}
-body.light-mode .top-btn.new-card-main-btn{
-  background:var(--cyan) !important;
-  color:#ffffff !important;
-  border-color:var(--cyan) !important;
-}
-</style>
-<style id="ultimate-card-box-scroll-fix">
-#homeView{
-  display:flex !important;
-  flex-direction:column !important;
-  overflow:hidden !important;
-  min-height:0 !important;
-}
-#notesContainer.notes-container,
-#notesContainer{
-  display:grid !important;
-  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
-  gap:12px !important;
-  padding:12px !important;
-  align-content:start !important;
-  box-sizing:border-box !important;
-  flex:0 0 auto !important;
-  width:100% !important;
-  height:620px !important;
-  max-height:620px !important;
-  min-height:620px !important;
-  overflow-x:hidden !important;
-  overflow-y:auto !important;
-  -webkit-overflow-scrolling:touch !important;
-}
-#notesContainer.list-mode,
-#notesContainer.notes-container.list-mode{
-  grid-template-columns:1fr !important;
-}
-#notesContainer .note-card{
-  width:100% !important;
-  min-width:0 !important;
-  height:290px !important;
-  min-height:290px !important;
-  max-height:290px !important;
-  display:flex !important;
-  flex-direction:column !important;
-  justify-content:flex-start !important;
-  overflow:hidden !important;
-  box-sizing:border-box !important;
-}
-#notesContainer .card-cover-box{
-  height:145px !important;
-  min-height:145px !important;
-  max-height:145px !important;
-  flex:0 0 145px !important;
-  overflow:hidden !important;
-  background:#fff !important;
-}
-#notesContainer .html-preview-wrapper{
-  width:222% !important;
-  height:222% !important;
-  transform:scale(0.45) !important;
-  transform-origin:top left !important;
-  pointer-events:auto !important;
-  background:#fff !important;
-  overflow:auto !important;
-}
-#notesContainer .html-preview-wrapper iframe{
-  width:100% !important;
-  height:100% !important;
-  border:0 !important;
-  pointer-events:auto !important;
-  background:#fff !important;
-}
-#notesContainer .card-body{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  padding:6px 8px !important;
-  overflow:hidden !important;
-}
-#notesContainer .card-footer{
-  flex:0 0 auto !important;
-  padding:5px 6px !important;
-}
-#notesContainer .card-footer-row{
-  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-  grid-template-rows:repeat(2,28px) !important;
-  gap:5px !important;
-}
-#notesContainer .card-footer button{
-  height:28px !important;
-  min-height:28px !important;
-  font-size:9px !important;
-}
-@media(max-width:640px){
-  #notesContainer{
-    height:600px !important;
-    max-height:600px !important;
-    min-height:600px !important;
-    gap:10px !important;
-    padding:10px !important;
-  }
-  #notesContainer .note-card{
-    height:280px !important;
-    min-height:280px !important;
-    max-height:280px !important;
-  }
-  #notesContainer .card-cover-box{
-    height:130px !important;
-    min-height:130px !important;
-    max-height:130px !important;
-    flex-basis:130px !important;
-  }
-}
-#israr-lab-related-pagination button{
-  -webkit-appearance:none;
-  appearance:none;
-}
-</style>
-<script id="ultimate-persist-and-pagination-fix">
+/* ----- script id: ultimate-persist-and-pagination-fix ----- */
 (function(){
   function persistNow(){
     try { if (typeof saveData === 'function') saveData(); } catch(e) {}
@@ -4128,779 +3650,8 @@ body.light-mode .top-btn.new-card-main-btn{
     } catch(e) {}
   });
 })();
-</script>
 
-
-<style id="recovery-same-as-home-cards-fix">
-#recoveryView{
-  display:none;
-  flex-direction:column !important;
-  background:var(--bg) !important;
-}
-#recoveryView .recovery-header{
-  flex-shrink:0 !important;
-}
-#recoveryContainer.notes-container,
-#recoveryContainer{
-  display:grid !important;
-  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
-  gap:12px !important;
-  padding:12px !important;
-  align-content:start !important;
-  overflow-x:hidden !important;
-  overflow-y:auto !important;
-  -webkit-overflow-scrolling:touch !important;
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  height:auto !important;
-  max-height:none !important;
-  box-sizing:border-box !important;
-}
-#recoveryContainer .note-card{
-  width:100% !important;
-  min-width:0 !important;
-  height:290px !important;
-  min-height:290px !important;
-  max-height:290px !important;
-  display:flex !important;
-  flex-direction:column !important;
-  justify-content:flex-start !important;
-  overflow:hidden !important;
-  box-sizing:border-box !important;
-}
-#recoveryContainer .card-cover-box{
-  height:145px !important;
-  min-height:145px !important;
-  max-height:145px !important;
-  flex:0 0 145px !important;
-  overflow:hidden !important;
-  background:#fff !important;
-  position:relative !important;
-}
-#recoveryContainer .html-preview-wrapper{
-  width:222% !important;
-  height:222% !important;
-  transform:scale(0.45) !important;
-  transform-origin:top left !important;
-  pointer-events:auto !important;
-  background:transparent !important;
-  overflow:hidden !important;
-}
-#recoveryContainer .html-preview-wrapper iframe{
-  width:100% !important;
-  height:100% !important;
-  border:0 !important;
-  background:#fff !important;
-}
-#recoveryContainer .card-body{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  padding:6px 8px !important;
-  overflow:hidden !important;
-}
-#recoveryContainer .card-footer{
-  flex:0 0 auto !important;
-  padding:5px 6px !important;
-}
-#recoveryContainer .card-checkbox{
-  display:none;
-  position:absolute !important;
-  top:8px !important;
-  right:8px !important;
-  width:18px !important;
-  height:18px !important;
-  z-index:6 !important;
-}
-@media(max-width:640px){
-  #recoveryContainer .note-card{
-    height:280px !important;
-    min-height:280px !important;
-    max-height:280px !important;
-  }
-  #recoveryContainer .card-cover-box{
-    height:130px !important;
-    min-height:130px !important;
-    max-height:130px !important;
-    flex-basis:130px !important;
-  }
-}
-</style>
-
-
-<style id="hide-home-header-on-subviews">
-/* Fixed home title strip only on home; sub-views are true fullscreen */
-#editorView, #recoveryView, #backupView, #categorySettingsPageView, #secureLockView, #fullHtmlView {
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100vw !important;
-  height: 100dvh !important;
-  max-height: 100dvh !important;
-  z-index: 1000005 !important;
-  padding-top: env(safe-area-inset-top, 0px) !important;
-  box-sizing: border-box !important;
-}
-#recoveryView .recovery-header,
-#backupView .recovery-header,
-#categorySettingsPageView .recovery-header {
-  position: relative !important;
-  z-index: 2 !important;
-  margin-top: 0 !important;
-}
-body.subview-active .israrlab-title-strip {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-</style>
-
-
-<style id="card-no-side-lines-solid">
-#notesContainer .note-card,
-#recoveryContainer .note-card,
-.notes-container .note-card{
-  border: none !important;
-  outline: none !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,.18) !important;
-  background: var(--card-bg) !important;
-}
-#notesContainer .card-cover-box,
-#recoveryContainer .card-cover-box,
-.notes-container .card-cover-box{
-  border: none !important;
-  border-bottom: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-#notesContainer .html-preview-wrapper,
-#notesContainer .html-preview-wrapper iframe,
-#recoveryContainer .html-preview-wrapper,
-#recoveryContainer .html-preview-wrapper iframe{
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-#notesContainer .card-body,
-#notesContainer .card-footer,
-#recoveryContainer .card-body,
-#recoveryContainer .card-footer{
-  border: none !important;
-  border-top: none !important;
-  outline: none !important;
-}
-body.light-mode #notesContainer .note-card,
-body.light-mode #recoveryContainer .note-card{
-  box-shadow: 0 6px 18px rgba(0,0,0,.08) !important;
-  border: none !important;
-}
-</style>
-
-
-<style id="card-preview-fill-no-empty">
-/* Card HTML preview fills cover solidly (no black/white empty slabs) */
-#notesContainer .card-cover-box,
-#recoveryContainer .card-cover-box,
-.notes-container .card-cover-box{
-  background: var(--card-bg) !important;
-  overflow: hidden !important;
-  position: relative !important;
-  border: none !important;
-}
-#notesContainer .html-preview-wrapper,
-#recoveryContainer .html-preview-wrapper,
-.notes-container .html-preview-wrapper{
-  width: 222% !important;
-  height: 222% !important;
-  transform: scale(0.45) !important;
-  transform-origin: top left !important;
-  pointer-events: none !important;
-  background: transparent !important;
-  overflow: hidden !important;
-}
-#notesContainer .html-preview-wrapper iframe,
-#recoveryContainer .html-preview-wrapper iframe,
-.notes-container .html-preview-wrapper iframe{
-  width: 100% !important;
-  height: 100% !important;
-  border: 0 !important;
-  background: transparent !important;
-  display: block !important;
-}
-</style>
-
-
-<style id="editor-scroll-lock-and-vault-cards">
-body.subview-active, body.subview-active html {
-  overflow: hidden !important;
-  overscroll-behavior: none !important;
-  touch-action: none;
-}
-/* Only hide interaction on home content, NOT on subviews */
-body.subview-active #homeView,
-body.subview-active .external-history-section,
-body.subview-active .article-section,
-body.subview-active #israr-lab-related-section,
-body.subview-active .hero,
-body.subview-active .main-footer,
-body.subview-active .israrlab-title-strip {
-  pointer-events: none !important;
-}
-#editorView,
-#recoveryView,
-#backupView,
-#secureLockView,
-#categorySettingsPageView,
-#fullHtmlView {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 1000010 !important;
-  background: var(--bg) !important;
-  overflow: hidden !important;
-  touch-action: auto !important;
-  pointer-events: auto !important;
-  display: none;
-  flex-direction: column !important;
-}
-#editorView { z-index: 1000012 !important; }
-#fullHtmlView { z-index: 1000025 !important; }
-#recoveryView .recovery-header,
-#backupView .recovery-header,
-#secureLockView .recovery-header,
-#categorySettingsPageView .recovery-header,
-#recoveryView .recovery-top-actions,
-#backupView .backup-controls,
-#secureLockView button,
-#recoveryView button,
-#backupView button {
-  pointer-events: auto !important;
-  position: relative;
-  z-index: 5;
-}
-#editorView .code-editor-wrapper,
-#editorView .content-textarea,
-#editorView .code-highlight-layer {
-  touch-action: pan-y pan-x !important;
-}
-#secureLockView {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 1000005 !important;
-  display: none;
-  flex-direction: column !important;
-  background: var(--bg) !important;
-}
-#secureLockContainer.notes-container {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 12px !important;
-  padding: 12px !important;
-  overflow-y: auto !important;
-  flex: 1 1 auto !important;
-  min-height: 0 !important;
-  align-content: start !important;
-}
-#secureLockContainer .note-card {
-  width: 100% !important;
-  height: 290px !important;
-  min-height: 290px !important;
-  max-height: 290px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-  border: none !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,.18) !important;
-}
-#secureLockContainer .card-cover-box {
-  height: 145px !important;
-  min-height: 145px !important;
-  flex: 0 0 145px !important;
-  overflow: hidden !important;
-  background: var(--card-bg) !important;
-  border: none !important;
-}
-#secureLockContainer .html-preview-wrapper {
-  width: 222% !important;
-  height: 222% !important;
-  transform: scale(0.45) !important;
-  transform-origin: top left !important;
-  pointer-events: none !important;
-  background: transparent !important;
-}
-#secureLockContainer .html-preview-wrapper iframe {
-  width: 100% !important;
-  height: 100% !important;
-  border: 0 !important;
-  background: transparent !important;
-}
-#secureLockContainer .card-checkbox {
-  position: absolute !important;
-  top: 8px !important;
-  right: 8px !important;
-  width: 18px !important;
-  height: 18px !important;
-  z-index: 6 !important;
-}
-</style>
-
-
-<style id="card-clip-and-interactive-preview">
-/* Clip card so preview never sticks out (dark/light) */
-#notesContainer .note-card,
-#recoveryContainer .note-card,
-#secureLockContainer .note-card {
-  overflow: hidden !important;
-  position: relative !important;
-  isolation: isolate !important;
-  contain: layout paint !important;
-  border-radius: 14px !important;
-  max-width: 100% !important;
-}
-#notesContainer .card-cover-box,
-#recoveryContainer .card-cover-box,
-#secureLockContainer .card-cover-box {
-  overflow: hidden !important;
-  position: relative !important;
-  border-radius: 14px 14px 0 0 !important;
-  z-index: 1 !important;
-  max-width: 100% !important;
-}
-#notesContainer .html-preview-wrapper,
-#recoveryContainer .html-preview-wrapper,
-#secureLockContainer .html-preview-wrapper {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 222% !important;
-  height: 222% !important;
-  transform: scale(0.45) !important;
-  transform-origin: top left !important;
-  /* Interactive: buttons inside HTML preview work */
-  pointer-events: auto !important;
-  overflow: hidden !important;
-  background: transparent !important;
-  z-index: 1 !important;
-}
-#notesContainer .html-preview-wrapper iframe,
-#recoveryContainer .html-preview-wrapper iframe,
-#secureLockContainer .html-preview-wrapper iframe {
-  pointer-events: auto !important;
-  border: 0 !important;
-  background: transparent !important;
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-}
-/* Footer buttons stay above iframe */
-#notesContainer .card-body,
-#notesContainer .card-footer,
-#recoveryContainer .card-body,
-#recoveryContainer .card-footer,
-#secureLockContainer .card-body,
-#secureLockContainer .card-footer {
-  position: relative !important;
-  z-index: 3 !important;
-  pointer-events: auto !important;
-  background: var(--card-bg) !important;
-}
-#notesContainer .card-footer button,
-#notesContainer .card-body,
-#secureLockContainer .card-footer button {
-  pointer-events: auto !important;
-}
-</style>
-
-
-<style id="live-interactive-card-preview">
-/* Live interactive HTML inside card previews (home + recovery + vault) */
-#notesContainer .card-cover-box,
-#recoveryContainer .card-cover-box,
-#secureLockContainer .card-cover-box {
-  overflow: hidden !important;
-  position: relative !important;
-  z-index: 1 !important;
-}
-#notesContainer .html-preview-wrapper,
-#recoveryContainer .html-preview-wrapper,
-#secureLockContainer .html-preview-wrapper {
-  pointer-events: auto !important;
-  overflow: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-#notesContainer .html-preview-wrapper iframe,
-#recoveryContainer .html-preview-wrapper iframe,
-#secureLockContainer .html-preview-wrapper iframe {
-  pointer-events: auto !important;
-  touch-action: auto !important;
-}
-/* Keep card action buttons always clickable above preview */
-#notesContainer .card-footer,
-#notesContainer .card-body,
-#recoveryContainer .card-footer,
-#recoveryContainer .card-body,
-#secureLockContainer .card-footer,
-#secureLockContainer .card-body {
-  position: relative !important;
-  z-index: 4 !important;
-  pointer-events: auto !important;
-  background: var(--card-bg) !important;
-}
-</style>
-
-
-<style id="force-interactive-previews-final">
-#notesContainer .html-preview-wrapper,
-#recoveryContainer .html-preview-wrapper,
-#secureLockContainer .html-preview-wrapper {
-  pointer-events: auto !important;
-}
-#notesContainer .html-preview-wrapper iframe,
-#recoveryContainer .html-preview-wrapper iframe,
-#secureLockContainer .html-preview-wrapper iframe {
-  pointer-events: auto !important;
-}
-#recoveryContainer .note-card .card-footer .recovery-btn-restore {
-  display: none !important;
-}
-</style>
-
-
-<style id="card-thin-theme-outline">
-/* Very thin theme-colored outline on cards */
-#notesContainer .note-card,
-#recoveryContainer .note-card,
-#secureLockContainer .note-card {
-  border: 1px solid color-mix(in srgb, var(--cyan) 35%, transparent) !important;
-  outline: none !important;
-  box-shadow: 0 8px 22px rgba(0,0,0,.16) !important;
-}
-body:not(.light-mode) #notesContainer .note-card,
-body:not(.light-mode) #recoveryContainer .note-card,
-body:not(.light-mode) #secureLockContainer .note-card {
-  border: 1px solid color-mix(in srgb, var(--cyan) 42%, transparent) !important;
-  box-shadow: 0 0 0 0.5px color-mix(in srgb, var(--cyan) 18%, transparent), 0 10px 24px rgba(0,0,0,.28) !important;
-}
-body.light-mode #notesContainer .note-card,
-body.light-mode #recoveryContainer .note-card,
-body.light-mode #secureLockContainer .note-card {
-  border: 1px solid color-mix(in srgb, var(--cyan) 28%, #ccc) !important;
-  box-shadow: 0 6px 16px rgba(0,0,0,.08) !important;
-}
-/* Clip so preview never sticks outside the thin outline */
-#notesContainer .note-card,
-#recoveryContainer .note-card,
-#secureLockContainer .note-card {
-  overflow: hidden !important;
-  border-radius: 14px !important;
-}
-</style>
-
-
-<style id="recovery-visible-cards">
-#recoveryView {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 1000010 !important;
-  flex-direction: column !important;
-  background: var(--bg) !important;
-  pointer-events: auto !important;
-  overflow: hidden !important;
-}
-#recoveryContainer.notes-container,
-#recoveryContainer {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 12px !important;
-  padding: 12px !important;
-  overflow-y: auto !important;
-  flex: 1 1 auto !important;
-  min-height: 0 !important;
-  align-content: start !important;
-  pointer-events: auto !important;
-}
-#recoveryContainer .note-card {
-  display: flex !important;
-  flex-direction: column !important;
-  height: 290px !important;
-  min-height: 290px !important;
-  max-height: 290px !important;
-  overflow: hidden !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  background: var(--card-bg) !important;
-  border: 1px solid color-mix(in srgb, var(--cyan) 35%, transparent) !important;
-  border-radius: 14px !important;
-}
-#recoveryContainer .empty-notes {
-  grid-column: 1 / -1 !important;
-  color: var(--muted) !important;
-  text-align: center !important;
-  padding: 40px 16px !important;
-}
-</style>
-
-<style id="full-html-preview-header-fix">
-/* Full HTML Preview header: single-line title + buttons that never overflow */
-#fullHtmlView .full-html-preview-header,
-#fullHtmlView .recovery-header.full-html-preview-header {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 8px !important;
-  padding: 10px 12px !important;
-  flex-shrink: 0 !important;
-  min-height: 48px !important;
-  box-sizing: border-box !important;
-  overflow: visible !important;
-  position: relative !important;
-  z-index: 50 !important;
-}
-#fullHtmlView .full-html-back-btn,
-#fullHtmlView .full-html-copy-btn {
-  flex: 0 0 auto !important;
-  min-width: 0 !important;
-  max-width: 42% !important;
-  height: 34px !important;
-  min-height: 34px !important;
-  padding: 0 10px !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  gap: 5px !important;
-  border-radius: 8px !important;
-}
-#fullHtmlView .full-html-back-btn .btn-label,
-#fullHtmlView .full-html-copy-btn .btn-label {
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  line-height: 1 !important;
-}
-#fullHtmlView .full-html-title,
-#fullHtmlView #fullHtmlTitle {
-  display: none !important;
-}
-@media (max-width: 420px) {
-  #fullHtmlView .full-html-preview-header {
-    padding: 8px 8px !important;
-    gap: 6px !important;
-  }
-  #fullHtmlView .full-html-back-btn,
-  #fullHtmlView .full-html-copy-btn {
-    height: 32px !important;
-    min-height: 32px !important;
-    padding: 0 8px !important;
-    font-size: 10px !important;
-    max-width: 38% !important;
-  }
-  #fullHtmlView .full-html-back-btn .btn-label,
-  #fullHtmlView .full-html-copy-btn .btn-label {
-    font-size: 10px !important;
-  }
-  #fullHtmlView .full-html-title,
-  #fullHtmlView #fullHtmlTitle {
-    font-size: 12px !important;
-  }
-}
-@media (max-width: 340px) {
-  #fullHtmlView .full-html-back-btn .btn-label,
-  #fullHtmlView .full-html-copy-btn .btn-label {
-    /* keep short labels only */
-  }
-  #fullHtmlView .full-html-title {
-    font-size: 11px !important;
-  }
-}
-</style>
-
-
-<style id="mobile-code-box-no-overflow-full-color-fix">
-/* Code must stay INSIDE the editor box on mobile: no right-side spill */
-#editorView .code-editor-wrapper{
-  overflow: hidden !important;
-  max-width: 100% !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  position: relative !important;
-  box-sizing: border-box !important;
-}
-#editorView .editor-input-area{
-  overflow: hidden !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  width: 100% !important;
-  position: relative !important;
-}
-#editorView .line-numbers{
-  flex-shrink: 0 !important;
-  overflow: hidden !important;
-}
-/* Wrap long lines so full code is readable on phone without horizontal spill */
-#editorView #htmlCodeInput,
-#editorView .content-textarea,
-#editorView .code-highlight-layer,
-#editorView .code-highlight-layer code{
-  white-space: pre !important;
-  overflow-wrap: anywhere !important;
-  word-break: break-word !important;
-  word-wrap: break-word !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-  min-width: 0 !important;
-}
-#editorView .code-highlight-layer{
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  margin: 0 !important;
-  padding: 12px !important;
-  overflow: hidden !important; /* textarea drives scroll */
-  min-width: 0 !important;
-  max-width: 100% !important;
-  pointer-events: none !important;
-  z-index: 1 !important;
-}
-#editorView #htmlCodeInput,
-#editorView .content-textarea{
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  margin: 0 !important;
-  padding: 12px !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  resize: none !important;
-  z-index: 2 !important;
-  background: transparent !important;
-}
-#editorView .editor-input-area.syntax-ready #htmlCodeInput,
-#editorView .editor-input-area.syntax-ready .content-textarea{
-  color: transparent !important;
-  -webkit-text-fill-color: transparent !important;
-  caret-color: #58a6ff !important;
-}
-body.light-mode #editorView .editor-input-area.syntax-ready #htmlCodeInput,
-body.light-mode #editorView .editor-input-area.syntax-ready .content-textarea{
-  caret-color: #0969da !important;
-}
-/* Dark / light colored tokens always visible when highlighted */
-#editorView .code-highlight-layer .hljs-tag,
-#editorView .code-highlight-layer .hljs-name{color:#79c0ff;}
-#editorView .code-highlight-layer .hljs-attr{color:#d2a8ff;}
-#editorView .code-highlight-layer .hljs-string{color:#a5d6ff;}
-#editorView .code-highlight-layer .hljs-keyword,
-#editorView .code-highlight-layer .hljs-selector-tag{color:#ff7b72;}
-#editorView .code-highlight-layer .hljs-comment{color:#8b949e;font-style:italic;}
-#editorView .code-highlight-layer .hljs-number,
-#editorView .code-highlight-layer .hljs-literal{color:#79c0ff;}
-body.light-mode #editorView .code-highlight-layer{background:#ffffff !important;color:#24292f !important;}
-body.light-mode #editorView .code-highlight-layer .hljs-tag,
-body.light-mode #editorView .code-highlight-layer .hljs-name{color:#0550ae !important;}
-body.light-mode #editorView .code-highlight-layer .hljs-attr{color:#8250df !important;}
-body.light-mode #editorView .code-highlight-layer .hljs-string{color:#0a3069 !important;}
-body.light-mode #editorView .code-highlight-layer .hljs-keyword,
-body.light-mode #editorView .code-highlight-layer .hljs-selector-tag{color:#cf222e !important;}
-body.light-mode #editorView .code-highlight-layer .hljs-comment{color:#6e7781 !important;}
-body.light-mode #editorView .code-highlight-layer .hljs-number,
-body.light-mode #editorView .code-highlight-layer .hljs-literal{color:#0550ae !important;}
-</style>
-
-
-<style id="line-gutter-scroll-sync-fix">
-#editorView .line-numbers{
-  overflow: hidden !important;
-  height: 100% !important;
-  max-height: 100% !important;
-  overscroll-behavior: none !important;
-  scrollbar-width: none !important;
-}
-#editorView .line-numbers::-webkit-scrollbar{ display:none !important; width:0 !important; height:0 !important; }
-#editorView .code-editor-wrapper{
-  align-items: stretch !important;
-}
-#editorView .line-numbers,
-#editorView #htmlCodeInput,
-#editorView .code-highlight-layer,
-#editorView .code-highlight-layer code{
-  font-family: Consolas, Monaco, "Courier New", monospace !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  line-height: 1.6 !important;
-  letter-spacing: normal !important;
-  tab-size: 2 !important;
-}
-</style>
-
-
-<style id="line-code-perfect-scroll-sync">
-/* 1 code line = 1 gutter line. No wrap mismatch. Horizontal scroll stays INSIDE editor. */
-#editorView .code-editor-wrapper{
-  overflow: hidden !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  display: flex !important;
-  align-items: stretch !important;
-}
-#editorView .line-numbers{
-  overflow: hidden !important; /* driven only by JS scrollTop */
-  height: 100% !important;
-  max-height: none !important;
-  flex-shrink: 0 !important;
-  white-space: pre !important;
-  line-height: 1.6 !important;
-  font-size: 14px !important;
-  font-family: Consolas, Monaco, "Courier New", monospace !important;
-  font-weight: 600 !important;
-  padding: 12px 6px 12px 0 !important;
-  box-sizing: border-box !important;
-  scrollbar-width: none !important;
-}
-#editorView .line-numbers::-webkit-scrollbar{ display: none !important; width: 0 !important; }
-#editorView .editor-input-area{
-  overflow: hidden !important;
-  min-width: 0 !important;
-  flex: 1 1 auto !important;
-  position: relative !important;
-}
-#editorView #htmlCodeInput,
-#editorView .content-textarea,
-#editorView .code-highlight-layer,
-#editorView .code-highlight-layer code{
-  white-space: pre !important;          /* NO wrap — keeps line numbers locked to code */
-  overflow-wrap: normal !important;
-  word-break: normal !important;
-  word-wrap: normal !important;
-  line-height: 1.6 !important;
-  font-size: 14px !important;
-  font-family: Consolas, Monaco, "Courier New", monospace !important;
-  font-weight: 600 !important;
-  tab-size: 2 !important;
-  letter-spacing: normal !important;
-  box-sizing: border-box !important;
-}
-#editorView #htmlCodeInput,
-#editorView .content-textarea{
-  overflow-x: auto !important;   /* long lines scroll inside, not outside screen */
-  overflow-y: auto !important;
-  padding: 12px !important;
-  margin: 0 !important;
-}
-#editorView .code-highlight-layer{
-  overflow: hidden !important;   /* textarea is the only scroller */
-  padding: 12px !important;
-  margin: 0 !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 0 !important;
-  max-width: none !important;
-}
-</style>
-<script id="line-scroll-raf-bind">
+/* ----- script id: line-scroll-raf-bind ----- */
 (function(){
   function bind(){
     var ta = document.getElementById('htmlCodeInput');
@@ -4920,95 +3671,8 @@ body.light-mode #editorView .code-highlight-layer .hljs-literal{color:#0550ae !i
   else bind();
   window.addEventListener('load', bind);
 })();
-</script>
 
-
-<style id="editor-no-right-spill-fix">
-/* Long lines stay INSIDE the editor card — swipe left/right inside code area only */
-#editorView .code-editor-wrapper{
-  overflow: hidden !important;
-  max-width: 100% !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: stretch !important;
-  box-sizing: border-box !important;
-}
-#editorView .line-numbers{
-  overflow: hidden !important;
-  flex: 0 0 auto !important;
-  max-width: 52px !important;
-  z-index: 3 !important;
-}
-#editorView .editor-input-area{
-  position: relative !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;          /* critical: allow shrink so flex child doesn't explode width */
-  max-width: 100% !important;
-  width: 100% !important;
-  overflow-x: auto !important;      /* horizontal pan inside */
-  overflow-y: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-  overscroll-behavior: contain !important;
-  touch-action: pan-x pan-y !important;
-}
-#editorView #htmlCodeInput,
-#editorView .content-textarea{
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  height: 100% !important;
-  margin: 0 !important;
-  padding: 12px !important;
-  box-sizing: border-box !important;
-  white-space: pre !important;
-  overflow-x: auto !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  overscroll-behavior: contain !important;
-  touch-action: pan-x pan-y !important;
-  z-index: 2 !important;
-}
-#editorView .code-highlight-layer{
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  height: 100% !important;
-  margin: 0 !important;
-  padding: 12px !important;
-  box-sizing: border-box !important;
-  white-space: pre !important;
-  overflow-x: hidden !important;
-  overflow-y: hidden !important;
-  pointer-events: none !important;
-  z-index: 1 !important;
-}
-#editorView .code-highlight-layer code{
-  display: block !important;
-  white-space: pre !important;
-  max-width: none !important;
-}
-/* Prevent any parent from letting code paint outside the phone screen */
-#editorView,
-#editorView .editor-body,
-#editorView .editor-body > div{
-  max-width: 100vw !important;
-  overflow-x: hidden !important;
-  box-sizing: border-box !important;
-}
-</style>
-<script id="editor-hscroll-sync">
+/* ----- script id: editor-hscroll-sync ----- */
 (function(){
   function bind(){
     var ta = document.getElementById('htmlCodeInput');
@@ -5028,80 +3692,8 @@ body.light-mode #editorView .code-highlight-layer .hljs-literal{color:#0550ae !i
   else bind();
   window.addEventListener('load', bind);
 })();
-</script>
 
-
-<style id="codemirror-editor-skin">
-/* CodeMirror fills editor like israrlabhtmlpreview — line wrap, no right spill */
-#editorView .code-editor-wrapper{
-  display:flex !important;
-  flex-direction:column !important;
-  overflow:hidden !important;
-  min-height:0 !important;
-  height:100% !important;
-  position:relative !important;
-  background:#0d1117 !important;
-}
-#editorView .line-numbers{ display:none !important; } /* CM has built-in gutters */
-#editorView .editor-input-area{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  height:100% !important;
-  position:relative !important;
-  overflow:hidden !important;
-}
-#editorView .code-highlight-layer{ display:none !important; } /* CM does colors */
-#editorView #htmlCodeInput.content-textarea{
-  /* hidden once CM mounts; keep in DOM for fallback */
-  opacity:0 !important;
-  position:absolute !important;
-  pointer-events:none !important;
-  height:0 !important;
-  width:0 !important;
-}
-#editorView .CodeMirror{
-  position:absolute !important;
-  inset:0 !important;
-  width:100% !important;
-  height:100% !important;
-  font-family: Consolas, Monaco, "Courier New", monospace !important;
-  font-size:14px !important;
-  line-height:1.55 !important;
-  background:#0d1117 !important;
-  color:#e6edf3 !important;
-  border:none !important;
-}
-#editorView .CodeMirror-scroll{
-  min-height:100% !important;
-  max-width:100% !important;
-}
-#editorView .CodeMirror-gutters{
-  background:#161b22 !important;
-  border-right:1px solid rgba(255,255,255,.08) !important;
-}
-#editorView .CodeMirror-linenumber{
-  color:#8b949e !important;
-  min-width:36px !important;
-  padding:0 8px 0 0 !important;
-}
-#editorView .CodeMirror-cursor{ border-left:2px solid #58a6ff !important; }
-#editorView .CodeMirror-focused .CodeMirror-selected,
-#editorView .CodeMirror-line::selection,
-#editorView .CodeMirror-line > span::selection{
-  background: rgba(88,166,255,.28) !important;
-}
-body.light-mode #editorView .CodeMirror{
-  background:#ffffff !important;
-  color:#24292f !important;
-}
-body.light-mode #editorView .CodeMirror-gutters{
-  background:#f6f8fa !important;
-  border-right:1px solid #d0d7de !important;
-}
-body.light-mode #editorView .CodeMirror-linenumber{ color:#6e7781 !important; }
-body.light-mode #editorView .CodeMirror-cursor{ border-left-color:#0969da !important; }
-</style>
-<script id="codemirror-editor-bootstrap">
+/* ----- script id: codemirror-editor-bootstrap ----- */
 (function(){
   var cmInstance = null;
   var cmReady = false;
@@ -5344,4 +3936,3 @@ body.light-mode #editorView .CodeMirror-cursor{ border-left-color:#0969da !impor
   else boot();
   window.addEventListener('load', function(){ patchEditorIO(); window.refreshEditorLayout(); });
 })();
-
