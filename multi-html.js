@@ -1,3 +1,4 @@
+<script id="israrlab-app-main-js">
 
 /* ===== merged block: inline#14 ===== */
 /* ========== PERSISTENT STORAGE (IndexedDB + localStorage) ========== */
@@ -4814,3 +4815,5 @@ function saveAndReturnHome(){
   else boot();
   window.addEventListener('load', function(){ patchEditorIO(); window.refreshEditorLayout(); });
 })();
+
+
