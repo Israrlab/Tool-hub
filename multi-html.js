@@ -1,29 +1,5 @@
-/*
- * ============================================================
- *  IsrarLab Multi HTML Viewer
- *  Live Preview Multiple HTML Codes Online
- * ============================================================
- *  Author / Coded by : Israr Ahmad / Israr Lab (Techno Israr)
- *  Official Website  : https://www.technoisrar.in
- *  Tool Page         : https://israrlabmultihtmlviewer.blogspot.com/
- * ============================================================
- *  Combined single JavaScript file for easy GitHub / hosting
- *  All original inline scripts merged into one clean file
- *  Optimized for mobile (no hang from huge single HTML)
- * ============================================================
- */
 
-//<![CDATA[
-  (function() {
-    var url = window.location.href;
-    if (url.indexOf("?m=1") !== -1 || url.indexOf("&m=1") !== -1) {
-      var cleanUrl = url.replace("?m=1", "").replace("&m=1", "").replace("?m=0", "").replace("&m=0", "");
-      if (cleanUrl.endsWith("?")) { cleanUrl = cleanUrl.slice(0, -1); }
-      window.history.replaceState(null, null, cleanUrl);
-    }
-  })();
-  //]]>
-
+/* ===== merged block: inline#14 ===== */
 /* ========== PERSISTENT STORAGE (IndexedDB + localStorage) ========== */
 const ISRAR_DB_NAME = 'IsrarLabMultiHtmlViewerDB';
 const ISRAR_DB_STORE = 'appdata';
@@ -414,9 +390,11 @@ function showHomeDirectly() {
     var hv = document.getElementById('homeView');
     var ed = document.getElementById('editorView');
     var pv = document.getElementById('fullHtmlView');
+    var iv = document.getElementById('infoView');
     alreadyHome = hv && hv.style.display === 'flex'
       && (!ed || ed.style.display === 'none')
       && (!pv || pv.style.display === 'none')
+      && (!iv || iv.style.display === 'none')
       && !window.__israrInSubview;
   } catch (e) {}
 
@@ -443,7 +421,7 @@ function showHomeDirectly() {
   } catch (e) {}
   if (clockInterval) clearInterval(clockInterval);
 
-  var hideIds = ['editorView','recoveryView','backupView','categorySettingsPageView','secureLockView','fullHtmlView','settingsModal','sortMenuModal','modeChangeModal','allDeleteAuthModal'];
+  var hideIds = ['editorView','recoveryView','backupView','categorySettingsPageView','secureLockView','fullHtmlView','infoView','settingsModal','sortMenuModal','modeChangeModal','allDeleteAuthModal'];
   for (var i = 0; i < hideIds.length; i++) {
     try {
       var el = document.getElementById(hideIds[i]);
@@ -1270,12 +1248,22 @@ function renderExternalHistoryLogs() {
     var originalIndex = historyLogs.indexOf(log);
     var itemNumber = historyLogs.length - originalIndex;
     var viewsCount = log.viewsCount || 0;
-    var titleDisplay = log.title || '';
+    var titleDisplay = log.title || 'Untitled';
     var isTitleMatched = query.length > 0 && titleDisplay.toLowerCase().includes(query);
     var noteIdx = (log.noteIndex !== undefined) ? log.noteIndex : 0;
 
+    /* Green highlight matched search word inside title */
+    var titleHtml = String(titleDisplay).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    if (query.length > 0) {
+      try {
+        var safeQ = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        var re = new RegExp('(' + safeQ + ')', 'ig');
+        titleHtml = titleHtml.replace(re, '<mark class="hist-search-hit">$1</mark>');
+      } catch (e) {}
+    }
+
     var box = document.createElement('div');
-    box.className = 'history-box-item';
+    box.className = 'history-box-item' + (isTitleMatched ? ' highlighted-box' : '');
     box.id = 'history-box-' + originalIndex;
     box.onclick = function() { focusCardFromHistory(noteIdx, originalIndex); };
 
@@ -1283,7 +1271,7 @@ function renderExternalHistoryLogs() {
       '<div class="history-box-header">' +
         '<div style="display:flex; align-items:center; flex:1; overflow:hidden;">' +
           '<span class="history-num-badge">#' + itemNumber + '</span>' +
-          '<span class="history-box-title ' + (isTitleMatched ? 'search-matched' : '') + '" title="' + (log.title || '').replace(/"/g, '&quot;') + '">📌 ' + (log.title || '') + '</span>' +
+          '<span class="history-box-title ' + (isTitleMatched ? 'search-matched' : '') + '" title="' + String(titleDisplay).replace(/"/g, '&quot;') + '">📌 ' + titleHtml + '</span>' +
         '</div>' +
         '<div style="display:flex; align-items:center; gap:6px;">' +
           '<span style="color:var(--cyan);font-weight:700;font-size:10px;white-space:nowrap;">Updated ' + (log.updateCount || 0) + ' times</span>' +
@@ -1456,37 +1444,70 @@ window.previewCurrentEditorCode = function previewCurrentEditorCode() {
 window.__previewDevice = 'mobile';
 window.__previewNoteIndex = -1;
 
+window.__pvSizeMenuCloser = null;
+window.closePreviewSizeMenu = function closePreviewSizeMenu() {
+  var menu = document.getElementById('pvSizeMenu');
+  if (menu) menu.style.display = 'none';
+  if (window.__pvSizeMenuCloser) {
+    try {
+      document.removeEventListener('pointerdown', window.__pvSizeMenuCloser, true);
+      document.removeEventListener('click', window.__pvSizeMenuCloser, true);
+      window.removeEventListener('scroll', window.__pvSizeMenuCloser, true);
+      window.removeEventListener('resize', window.__pvSizeMenuCloser, true);
+    } catch (e) {}
+    window.__pvSizeMenuCloser = null;
+  }
+};
+
 window.togglePreviewSizeMenu = function togglePreviewSizeMenu(e) {
   try { if (e) { e.preventDefault(); e.stopPropagation(); } } catch (err) {}
   var menu = document.getElementById('pvSizeMenu');
+  var btn = document.getElementById('pvSizeBtn');
   if (!menu) return;
   var openNow = (menu.style.display === 'flex');
-  /* close any other */
   if (openNow) {
-    menu.style.display = 'none';
+    window.closePreviewSizeMenu();
     return;
   }
+  /* Position fixed menu just under the Mobile button */
+  try {
+    var r = (btn || (e && e.currentTarget) || menu.parentElement).getBoundingClientRect();
+    var top = Math.round(r.bottom + 6);
+    var left = Math.round(r.left);
+    var menuW = 170;
+    if (left + menuW > window.innerWidth - 8) {
+      left = Math.max(8, window.innerWidth - menuW - 8);
+    }
+    if (left < 8) left = 8;
+    menu.style.top = top + 'px';
+    menu.style.left = left + 'px';
+    menu.style.right = 'auto';
+    menu.style.bottom = 'auto';
+  } catch (posErr) {}
   menu.style.display = 'flex';
-  /* outside close */
+  /* Outside click / scroll / resize → close */
   setTimeout(function () {
     function closer(ev) {
-      var t = ev.target;
+      var t = ev && ev.target;
       try {
-        if (menu.contains(t)) return;
-        if (t && (t.id === 'pvSizeBtn' || (t.closest && t.closest('#pvSizeBtn')))) return;
+        if (t && menu.contains(t)) return;
+        if (t && (t.id === 'pvSizeBtn' || (t.closest && (t.closest('#pvSizeBtn') || t.closest('.pv-size-wrap'))))) return;
       } catch (e2) {}
-      menu.style.display = 'none';
-      document.removeEventListener('click', closer, true);
-      document.removeEventListener('touchend', closer, true);
+      window.closePreviewSizeMenu();
     }
+    window.__pvSizeMenuCloser = closer;
+    document.addEventListener('pointerdown', closer, true);
     document.addEventListener('click', closer, true);
-    document.addEventListener('touchend', closer, true);
-  }, 80);
+    window.addEventListener('scroll', closer, true);
+    window.addEventListener('resize', closer, true);
+  }, 30);
 };
 
 window.pickPreviewSize = function pickPreviewSize(device) {
-  var menu = document.getElementById('pvSizeMenu');
-  if (menu) menu.style.display = 'none';
+  try { window.closePreviewSizeMenu(); } catch (e) {
+    var menu = document.getElementById('pvSizeMenu');
+    if (menu) menu.style.display = 'none';
+  }
   setPreviewDevice(device || 'mobile');
   var label = document.getElementById('pvSizeLabel');
   var btn = document.getElementById('pvSizeBtn');
@@ -1686,6 +1707,15 @@ function openFullHtmlViewer(index) {
 }
 
 function closeFullHtmlView() {
+  try {
+    var iv = document.getElementById('infoView');
+    if (iv) iv.style.display = 'none';
+    window.__israrInfoOpen = false;
+  } catch (e) {}
+  try {
+    var menu = document.getElementById('pvSizeMenu');
+    if (menu) menu.style.display = 'none';
+  } catch (e) {}
   document.getElementById('fullHtmlView').style.display = 'none';
   /* If preview was opened from editor, return to editor (keep code) */
   if (window.__previewFromEditor) {
@@ -1721,28 +1751,54 @@ function closeFullHtmlView() {
   window.__israrInSubview = false;
 }
 
-/* One-level history: subview -> home on Back. Home Back leaves site (no trap). */
+/* Layered history: Info -> Preview -> Home. Home Back leaves site (no trap). */
 window.__israrInSubview = false;
+window.__israrInfoOpen = false;
 window.addEventListener('popstate', function(event) {
-  var editorVisible = document.getElementById('editorView') && document.getElementById('editorView').style.display === 'flex';
+  var infoVisible = document.getElementById('infoView') && document.getElementById('infoView').style.display === 'flex';
   var previewVisible = document.getElementById('fullHtmlView') && document.getElementById('fullHtmlView').style.display === 'flex';
+  var editorVisible = document.getElementById('editorView') && document.getElementById('editorView').style.display === 'flex';
   var backupVisible = document.getElementById('backupView') && document.getElementById('backupView').style.display === 'flex';
   var recoveryVisible = document.getElementById('recoveryView') && document.getElementById('recoveryView').style.display === 'flex';
   var catSetVisible = document.getElementById('categorySettingsPageView') && document.getElementById('categorySettingsPageView').style.display === 'flex';
   var lockViewVisible = document.getElementById('secureLockView') && document.getElementById('secureLockView').style.display === 'flex';
   var settingsModalVisible = document.getElementById('settingsModal') && document.getElementById('settingsModal').style.display === 'flex';
-  var anySubview = editorVisible || previewVisible || backupVisible || recoveryVisible || catSetVisible || lockViewVisible || settingsModalVisible;
 
+  /* 1) Info open → close Info, stay on Preview (do NOT call history.back again) */
+  if (infoVisible || window.__israrInfoOpen) {
+    window.__israrInfoOpen = false;
+    try {
+      var iv = document.getElementById('infoView');
+      if (iv) iv.style.display = 'none';
+    } catch (e) {}
+    try {
+      var pv = document.getElementById('fullHtmlView');
+      if (pv) pv.style.display = 'flex';
+    } catch (e) {}
+    try { document.body.classList.add('subview-active'); } catch (e) {}
+    window.__israrInSubview = true;
+    try { history.replaceState({ view: 'preview', israr: 1 }, ''); } catch (e) {}
+    return;
+  }
+
+  /* 2) Preview open → close Preview (may return to editor or home) */
+  if (previewVisible) {
+    try { closeFullHtmlView(); } catch (e) {}
+    return;
+  }
+
+  /* 3) Any other subview → home */
+  var anySubview = editorVisible || backupVisible || recoveryVisible || catSetVisible || lockViewVisible || settingsModalVisible;
   if (anySubview || window.__israrInSubview) {
     window.isCreatingNewNote = false;
     window.editingNoteId = null;
     try { editingIndex = null; } catch (e) {}
     window.__israrInSubview = false;
+    window.__israrInfoOpen = false;
     try { showHomeDirectly(); } catch (e) {}
-    /* replaceState already done inside showHomeDirectly — next Back exits */
     return;
   }
-  /* Already on home with clean history: browser leaves the page normally */
+  /* Already on home: browser leaves the page normally */
 });
 
 
@@ -1773,6 +1829,337 @@ function copyCurrentFullCode() {
       document.execCommand('copy'); ta2.remove(); ok();
     } catch (e3) { alert('Copy failed'); }
   }
+}
+
+/* ========== INFO VIEW (from Preview toolbar) ========== */
+function getCurrentPreviewCode() {
+  try {
+    var frame = document.getElementById('fullHtmlIframe');
+    if (frame && frame.srcdoc && frame.srcdoc !== 'about:blank') return frame.srcdoc || '';
+  } catch (e) {}
+  try {
+    if (typeof window.__previewNoteIndex === 'number' && window.__previewNoteIndex >= 0 && notes[window.__previewNoteIndex]) {
+      return notes[window.__previewNoteIndex].htmlCode || '';
+    }
+  } catch (e) {}
+  try {
+    if (window.__previewFromEditor && typeof getEditorCode === 'function') return getEditorCode() || '';
+  } catch (e) {}
+  return '';
+}
+
+function stripHtmlToText(html) {
+  try {
+    var d = document.createElement('div');
+    d.innerHTML = html || '';
+    // remove scripts/styles
+    var scripts = d.querySelectorAll('script, style, noscript');
+    for (var i = 0; i < scripts.length; i++) scripts[i].remove();
+    return (d.textContent || d.innerText || '').replace(/\s+/g, ' ').trim();
+  } catch (e) { return ''; }
+}
+
+function extractTitleFromHtml(html) {
+  try {
+    var m = (html || '').match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    if (m && m[1]) return m[1].replace(/<[^>]+>/g, '').trim().slice(0, 120);
+  } catch (e) {}
+  try {
+    var m2 = (html || '').match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+    if (m2 && m2[1]) return m2[1].replace(/<[^>]+>/g, '').trim().slice(0, 120);
+  } catch (e) {}
+  try {
+    if (typeof window.__previewNoteIndex === 'number' && window.__previewNoteIndex >= 0 && notes[window.__previewNoteIndex]) {
+      return notes[window.__previewNoteIndex].title || 'Untitled Project';
+    }
+  } catch (e) {}
+  return 'Untitled Project';
+}
+
+function countWords(text) {
+  if (!text) return 0;
+  var t = String(text).trim();
+  if (!t) return 0;
+  return t.split(/\s+/).filter(Boolean).length;
+}
+
+/* Estimate Mobile / Responsive / Desktop friendliness from HTML source */
+function analyzeResponsiveScores(html) {
+  var h = String(html || '').toLowerCase();
+  var mobile = 42;
+  var tablet = 48;
+  var desktop = 55;
+  var responsive = 45;
+
+  // Viewport meta — strong mobile signal
+  if (/name\s*=\s*["']viewport["']/.test(h) || /content\s*=\s*["'][^"']*width\s*=\s*device-width/.test(h)) {
+    mobile += 22;
+    tablet += 12;
+    responsive += 18;
+  }
+  // Media queries
+  var mqCount = (h.match(/@media/g) || []).length;
+  if (mqCount > 0) {
+    var mqBoost = Math.min(20, 8 + mqCount * 3);
+    mobile += mqBoost;
+    tablet += mqBoost;
+    responsive += mqBoost + 4;
+    desktop += 6;
+  }
+  // Modern layout
+  if (h.indexOf('display:flex') !== -1 || h.indexOf('display: flex') !== -1 || h.indexOf('display:grid') !== -1 || h.indexOf('display: grid') !== -1) {
+    mobile += 8; tablet += 8; desktop += 6; responsive += 10;
+  }
+  // Fluid units
+  if (/%|vw|vh|rem|em|minmax|clamp\s*\(/.test(h)) {
+    mobile += 7; tablet += 7; responsive += 9; desktop += 4;
+  }
+  // max-width / min-width responsive patterns
+  if (/max-width\s*:/.test(h) || /min-width\s*:/.test(h)) {
+    mobile += 6; tablet += 8; responsive += 8; desktop += 5;
+  }
+  // Fixed large widths hurt mobile
+  var fixedWide = (h.match(/width\s*:\s*(6\d{2}|7\d{2}|8\d{2}|9\d{2}|1\d{3})px/g) || []).length;
+  if (fixedWide > 0) {
+    mobile -= Math.min(18, fixedWide * 5);
+    responsive -= Math.min(12, fixedWide * 3);
+    desktop += 4;
+  }
+  // Mobile meta / touch / apple
+  if (h.indexOf('apple-mobile-web-app') !== -1 || h.indexOf('mobile-web-app') !== -1 || h.indexOf('touch-action') !== -1) {
+    mobile += 6; responsive += 4;
+  }
+  // Bootstrap / tailwind-ish hints
+  if (h.indexOf('bootstrap') !== -1 || h.indexOf('col-md') !== -1 || h.indexOf('col-sm') !== -1 || /\b(sm|md|lg|xl):/.test(h)) {
+    mobile += 8; tablet += 10; desktop += 8; responsive += 12;
+  }
+  // Tables without overflow can hurt mobile
+  if (h.indexOf('<table') !== -1 && h.indexOf('overflow') === -1) {
+    mobile -= 6; responsive -= 4;
+  }
+  // Clamp scores 15–99
+  function clamp(n) { return Math.max(15, Math.min(99, Math.round(n))); }
+  mobile = clamp(mobile);
+  tablet = clamp(tablet);
+  desktop = clamp(desktop);
+  responsive = clamp(responsive);
+  // Overall mobile-first score
+  var mobileFriendly = clamp((mobile * 0.55) + (responsive * 0.35) + (tablet * 0.10));
+  return {
+    mobile: mobile,
+    tablet: tablet,
+    desktop: desktop,
+    responsive: responsive,
+    mobileFriendly: mobileFriendly
+  };
+}
+
+function generateRomanDescription(html, title, textContent) {
+  var lower = (html || '').toLowerCase();
+  var textLower = (textContent || '').toLowerCase();
+  var type = 'HTML Project / Webpage';
+  var purpose = 'general website content aur interactive elements';
+
+  if (lower.indexOf('privacy') !== -1 || textLower.indexOf('privacy policy') !== -1) {
+    type = 'Privacy Policy Generator / Tool';
+    purpose = 'website ya app ke liye privacy policy document automatically generate karna';
+  } else if (lower.indexOf('generator') !== -1 || textLower.indexOf('generate') !== -1) {
+    type = 'Online Generator Tool';
+    purpose = 'user inputs se content, code ya document generate karna';
+  } else if (lower.indexOf('calculator') !== -1 || textLower.indexOf('calculate') !== -1) {
+    type = 'Calculator Tool';
+    purpose = 'numbers aur formulas ke basis par calculations perform karna';
+  } else if (lower.indexOf('form') !== -1 && (lower.indexOf('input') !== -1 || lower.indexOf('<form') !== -1)) {
+    type = 'Form Based Web Tool';
+    purpose = 'user se data collect karke result dikhana';
+  } else if (lower.indexOf('portfolio') !== -1 || textLower.indexOf('portfolio') !== -1) {
+    type = 'Portfolio / Personal Website';
+    purpose = 'skills, projects aur personal information showcase karna';
+  } else if (lower.indexOf('blog') !== -1 || textLower.indexOf('blog') !== -1) {
+    type = 'Blog / Article Page';
+    purpose = 'articles, posts aur informational content present karna';
+  } else if (lower.indexOf('dashboard') !== -1) {
+    type = 'Dashboard Interface';
+    purpose = 'data aur controls ko organized way me manage karna';
+  } else if (lower.indexOf('game') !== -1 || lower.indexOf('score') !== -1) {
+    type = 'HTML Game / Interactive App';
+    purpose = 'browser me interactive game ya activity provide karna';
+  } else if (lower.indexOf('chat') !== -1 || lower.indexOf('message') !== -1) {
+    type = 'Chat / Messaging Interface';
+    purpose = 'messages aur communication features dikhana';
+  }
+
+  var hasCss = lower.indexOf('<style') !== -1 || lower.indexOf('.css') !== -1;
+  var hasJs = lower.indexOf('<script') !== -1 || lower.indexOf('function') !== -1;
+  var hasForm = lower.indexOf('<form') !== -1 || lower.indexOf('<input') !== -1;
+  var hasTable = lower.indexOf('<table') !== -1;
+  var tech = [];
+  if (hasCss) tech.push('CSS styling');
+  if (hasJs) tech.push('JavaScript interactivity');
+  if (hasForm) tech.push('HTML forms');
+  if (hasTable) tech.push('tables');
+  var techStr = tech.length ? tech.join(', ') : 'basic HTML structure';
+
+  var wordCount = countWords(textContent);
+  var shortText = (textContent || '').slice(0, 180).replace(/\s+/g, ' ').trim();
+  if (shortText.length > 150) shortText = shortText.slice(0, 150) + '...';
+
+  var desc = '';
+  desc += 'Yeh code ek "' + (title || 'Untitled') + '" naam ka ' + type + ' hai. Is project ka mukhya maqsad ' + purpose + ' hai. ';
+  desc += 'Code me ' + techStr + ' ka use kiya gaya hai jisse user experience smooth aur professional banta hai. ';
+  desc += 'IsrarLab Multi HTML Viewer me aap is project ko live preview me dekh sakte hain, edit kar sakte hain aur backup le sakte hain. ';
+  desc += 'Website / tool ka design modern dark theme ke sath banaya gaya hai jisme responsive layout, clear buttons aur easy navigation shamil hai. ';
+  if (shortText) {
+    desc += 'Content ka chhota sa hissa is tarah dikhta hai: "' + shortText + '". ';
+  }
+  desc += 'Is project me approximately ' + wordCount + ' words ka readable text content maujood hai. ';
+  desc += 'Aap is code ko apne Blogger, website, ya kisi bhi static host par laga sakte hain. Developer ne pure HTML, CSS aur JavaScript ka combination use kiya hai taaki tool offline bhi kaam kare. ';
+  desc += 'Agar aap is project ko customize karna chahte hain to Editor button se code open karke changes kar sakte hain. Title, colors, form fields aur logic aasani se update kiye ja sakte hain. ';
+  desc += 'Israr Lab ke tools collection ka hissa hone ki wajah se yeh project SEO friendly meta tags, clean structure aur mobile friendly design ke sath aata hai. ';
+  desc += 'Overall yeh ek complete ready-to-use solution hai jo beginners aur advanced users dono ke liye useful hai. Aap isse apne brand ke hisaab se rebrand bhi kar sakte hain. ';
+  desc += 'Zyada details ke liye code me comments aur structure check karein. Happy coding!';
+
+  // ensure roughly 180-220 words
+  var words = desc.split(/\s+/);
+  if (words.length > 220) desc = words.slice(0, 210).join(' ') + '...';
+  return desc;
+}
+
+function openInfoFromPreview() {
+  try { if (typeof window.closePreviewSizeMenu === 'function') window.closePreviewSizeMenu(); } catch (e) {}
+  var code = getCurrentPreviewCode();
+  var title = extractTitleFromHtml(code);
+  var textContent = stripHtmlToText(code);
+  var charCount = (code || '').length;
+  var wordCountCode = countWords(code);
+  var wordCountText = countWords(textContent);
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  var timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  var description = generateRomanDescription(code, title, textContent);
+
+  var developer = 'Israr Ahmad';
+  var owner = 'Israr Lab / Techno Israr';
+  var websiteName = title || 'IsrarLab Multi HTML Viewer Project';
+
+  // try meta author
+  try {
+    var authM = (code || '').match(/<meta[^>]+name=['"]author['"][^>]+content=['"]([^'"]+)['"]/i) ||
+                (code || '').match(/<meta[^>]+content=['"]([^'"]+)['"][^>]+name=['"]author['"]/i);
+    if (authM && authM[1]) developer = authM[1].trim();
+  } catch (e) {}
+
+  var html = '';
+  html += '<div style="display:flex;flex-direction:column;gap:14px;">';
+  html += '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:16px;">';
+  html += '<div style="font-size:18px;font-weight:800;color:var(--cyan);margin-bottom:8px;">' + escapeHtmlInfo(websiteName) + '</div>';
+  html += '<div style="font-size:12px;color:var(--muted);line-height:1.5;">Project / Website ka complete overview yahan diya gaya hai.</div>';
+  html += '</div>';
+
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
+  html += infoStatCard('Words (Text)', wordCountText);
+  html += infoStatCard('Characters (Code)', charCount);
+  html += infoStatCard('Words (Code)', wordCountCode);
+  html += infoStatCard('Date', dateStr);
+  html += infoStatCard('Time', timeStr);
+  html += infoStatCard('Lines (approx)', Math.max(1, (code || '').split('\n').length));
+  html += '</div>';
+
+  /* Device / Responsive scores */
+  var scores = analyzeResponsiveScores(code);
+  html += '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:16px;">';
+  html += '<div style="font-size:13px;font-weight:700;color:var(--cyan);margin-bottom:12px;"><i class="fas fa-mobile-alt"></i> Device & Responsive Score</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">';
+  html += infoPercentCard('Mobile Friendly', scores.mobileFriendly, '#42e8ff');
+  html += infoPercentCard('Responsive', scores.responsive, '#4ce3a8');
+  html += infoPercentCard('Mobile Layout', scores.mobile, '#fbbf24');
+  html += infoPercentCard('Tablet Ready', scores.tablet, '#b8a0ff');
+  html += infoPercentCard('Desktop Ready', scores.desktop, '#60a5fa');
+  html += infoPercentCard('Overall UX', Math.round((scores.mobileFriendly + scores.responsive + scores.desktop) / 3), '#f472b6');
+  html += '</div>';
+  html += '<div style="font-size:11px;color:var(--muted);line-height:1.5;">Ye scores HTML code (viewport, media queries, flex/grid, fluid units) se estimate kiye gaye hain. Real device testing alag se karein.</div>';
+  html += '</div>';
+
+  html += '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:16px;">';
+  html += '<div style="font-size:13px;font-weight:700;color:var(--purple);margin-bottom:8px;"><i class="fas fa-user-tie"></i> Developer & Owner</div>';
+  html += '<div style="font-size:13px;color:var(--text);margin-bottom:4px;"><strong>Developer:</strong> ' + escapeHtmlInfo(developer) + '</div>';
+  html += '<div style="font-size:13px;color:var(--text);"><strong>Owner / Brand:</strong> ' + escapeHtmlInfo(owner) + '</div>';
+  html += '</div>';
+
+  html += '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:16px;">';
+  html += '<div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:10px;"><i class="fas fa-align-left"></i> Website / Code ke bare me (Roman Hindi)</div>';
+  html += '<div style="font-size:13px;color:var(--muted);line-height:1.75;text-align:justify;">' + escapeHtmlInfo(description) + '</div>';
+  html += '</div>';
+
+  html += '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:14px;font-size:11px;color:var(--muted);text-align:center;">';
+  html += 'Info auto-generated by <strong style="color:var(--cyan);">IsrarLab Multi HTML Viewer</strong>. Preview se wapas jane ke liye Back dabayein.';
+  html += '</div>';
+  html += '</div>';
+
+  var area = document.getElementById('infoContentArea');
+  if (area) area.innerHTML = html;
+
+  var view = document.getElementById('infoView');
+  if (view) {
+    view.style.display = 'flex';
+    try { document.body.classList.add('subview-active'); } catch (e) {}
+    /* Real history entry so hardware Back returns to Preview (not Home) */
+    try {
+      history.pushState({ view: 'info', israr: 1 }, '');
+      window.__israrInSubview = true;
+      window.__israrInfoOpen = true;
+    } catch (e) {}
+  }
+}
+
+function infoStatCard(label, value) {
+  return '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:12px 10px;text-align:center;">' +
+    '<div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px;">' + escapeHtmlInfo(label) + '</div>' +
+    '<div style="font-size:16px;font-weight:800;color:var(--text);">' + escapeHtmlInfo(String(value)) + '</div></div>';
+}
+
+function infoPercentCard(label, percent, color) {
+  var p = Math.max(0, Math.min(100, parseInt(percent, 10) || 0));
+  color = color || 'var(--cyan)';
+  return '<div style="background:rgba(128,128,128,0.06);border:1px solid var(--border);border-radius:12px;padding:12px 10px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+    '<span style="font-size:11px;color:var(--muted);font-weight:600;">' + escapeHtmlInfo(label) + '</span>' +
+    '<span style="font-size:14px;font-weight:800;color:' + color + ';">' + p + '%</span></div>' +
+    '<div style="height:7px;background:rgba(128,128,128,0.15);border-radius:6px;overflow:hidden;">' +
+    '<div style="height:100%;width:' + p + '%;background:' + color + ';border-radius:6px;transition:width .4s ease;"></div></div></div>';
+}
+
+function escapeHtmlInfo(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function closeInfoView() {
+  /* Prefer history.back so stack stays clean (popstate will hide Info) */
+  if (window.__israrInfoOpen) {
+    window.__israrInfoOpen = false;
+    try {
+      history.back();
+      return;
+    } catch (e) {}
+  }
+  var view = document.getElementById('infoView');
+  if (view) view.style.display = 'none';
+  window.__israrInfoOpen = false;
+  try {
+    var pv = document.getElementById('fullHtmlView');
+    if (pv) {
+      pv.style.display = 'flex';
+      document.body.classList.add('subview-active');
+      window.__israrInSubview = true;
+      try { history.replaceState({ view: 'preview', israr: 1 }, ''); } catch (e) {}
+      return;
+    }
+  } catch (e) {}
+  try { document.body.classList.remove('subview-active'); } catch (e) {}
 }
 
 /* RENDER NOTES */
@@ -1813,7 +2200,7 @@ function renderNotes() {
     const safeTitle = String(note.title || 'Untitled Code').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     card.innerHTML = `
-      <input type="checkbox" class="card-checkbox main-card-checkbox" data-index="${originalIndex}" style="display:${isMarkDeleteMode?'block':'none'};" onclick="event.stopPropagation()">
+      <input type="checkbox" class="card-checkbox main-card-checkbox" data-index="${originalIndex}" style="display:${isMarkDeleteMode?'block':'none'};" onclick="event.stopPropagation()" onchange="updateHomeMarkDeleteUI()">
       <div class="pin-badge">PIN</div>
       <div class="card-cover-box">
         <div class="html-preview-wrapper"><iframe loading="lazy" data-srcdoc="" title="preview"></iframe></div>
@@ -1838,10 +2225,25 @@ function renderNotes() {
       iframe.__previewCode = code;
       iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-modals');
     }
+    /* Long-press ~1s → select mode + tick this card + Confirm Delete */
+    bindCardLongPress(card, function(heldCard) {
+      try {
+        isMarkDeleteMode = true;
+        var cbs = document.querySelectorAll('.main-card-checkbox');
+        cbs.forEach(function(cb) { cb.style.display = 'block'; });
+        var thisCb = heldCard.querySelector('.main-card-checkbox');
+        if (thisCb) {
+          thisCb.checked = true;
+          thisCb.style.display = 'block';
+        }
+        updateHomeMarkDeleteUI();
+      } catch (e) {}
+    });
     frag.appendChild(card);
   });
   container.innerHTML = '';
   container.appendChild(frag);
+  updateHomeMarkDeleteUI();
   if (typeof scheduleLazyCardPreviews === 'function') scheduleLazyCardPreviews(container);
 }
 
@@ -1915,21 +2317,60 @@ function fallbackCopyCardCode(code) {
   area.remove();
 }
 
-function openCardSettingMenu(event, index) {
-  event.stopPropagation();
-  selectedNoteIndexForContext = index;
-  try { hideCategoryPickerMenu(); } catch (e) {}
-  const rect = event.target.getBoundingClientRect();
-  const menu = document.getElementById('contextMenu');
-  menu.style.left = Math.min(rect.left, window.innerWidth - 190) + 'px';
-  menu.style.top = Math.max(8, rect.top - 160) + 'px';
-  menu.style.display = 'flex';
-}
-window.addEventListener('click', function() {
+window.__cardMenuCloser = null;
+function closeCardSettingMenu() {
   var m = document.getElementById('contextMenu');
   if (m) m.style.display = 'none';
+  if (window.__cardMenuCloser) {
+    try {
+      document.removeEventListener('pointerdown', window.__cardMenuCloser, true);
+      document.removeEventListener('click', window.__cardMenuCloser, true);
+    } catch (e) {}
+    window.__cardMenuCloser = null;
+  }
   try { hideCategoryPickerMenu(); } catch (e) {}
-});
+}
+
+function openCardSettingMenu(event, index) {
+  try { if (event) { event.stopPropagation(); event.preventDefault(); } } catch (e) {}
+  selectedNoteIndexForContext = index;
+  try { hideCategoryPickerMenu(); } catch (e) {}
+  var menu = document.getElementById('contextMenu');
+  if (!menu) return;
+  var anchor = (event && (event.currentTarget || event.target)) || null;
+  var rect = anchor && anchor.getBoundingClientRect ? anchor.getBoundingClientRect() : { left: 20, top: 120, bottom: 160, right: 80 };
+  var menuW = 200;
+  var menuH = 280;
+  var left = Math.min(rect.left, window.innerWidth - menuW - 8);
+  if (left < 8) left = 8;
+  var top = rect.bottom + 6;
+  if (top + menuH > window.innerHeight - 8) {
+    top = Math.max(8, rect.top - menuH - 6);
+  }
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+  menu.style.display = 'flex';
+  /* Outside close — attach after this click finishes so menu does not instantly close */
+  if (window.__cardMenuCloser) {
+    try {
+      document.removeEventListener('pointerdown', window.__cardMenuCloser, true);
+      document.removeEventListener('click', window.__cardMenuCloser, true);
+    } catch (e) {}
+  }
+  setTimeout(function() {
+    function closer(ev) {
+      var t = ev && ev.target;
+      try {
+        if (t && menu.contains(t)) return;
+        if (t && t.closest && t.closest('.card-setting-btn')) return;
+      } catch (e2) {}
+      closeCardSettingMenu();
+    }
+    window.__cardMenuCloser = closer;
+    document.addEventListener('pointerdown', closer, true);
+    document.addEventListener('click', closer, true);
+  }, 30);
+}
 
 
 function hideCategoryPickerMenu() {
@@ -2004,7 +2445,7 @@ function assignNoteToCategory(index, categoryName) {
   try { renderNotes(); } catch (e) {}
 }
 
-function menuActionCopy() { copyNoteCode({ stopPropagation:()=>{} }, selectedNoteIndexForContext); }
+function menuActionCopy() { copyNoteCode({ stopPropagation:()=>{} }, selectedNoteIndexForContext); closeCardSettingMenu(); }
 function menuActionDownloadFile() {
   const note = notes[selectedNoteIndexForContext];
   if (!note) return;
@@ -2014,12 +2455,36 @@ function menuActionDownloadFile() {
   let safeTitle = (note.title || 'index').replace(/[^a-z0-9]/gi, '_').toLowerCase();
   a.download = `${safeTitle}.html`;
   a.click();
+  closeCardSettingMenu();
   alert("HTML File Downloaded Successfully!");
 }
-function menuActionPinToggle() { notes[selectedNoteIndexForContext].isPinned = !notes[selectedNoteIndexForContext].isPinned; saveData(); renderNotes(); }
+function menuActionBackupCard() {
+  var note = notes[selectedNoteIndexForContext];
+  if (!note) { alert('Card not found.'); return; }
+  closeCardSettingMenu();
+  var backupObj = {
+    app: 'Israr Lab Multi HTML Viewer',
+    version: '2.9',
+    type: 'single-card',
+    exportDate: new Date().toISOString(),
+    note: note
+  };
+  var safeTitle = sanitizeBackupFileName(note.title || 'Card_Backup');
+  var fileName = safeTitle + '_backup.json';
+  var ok = downloadTextFile(fileName, JSON.stringify(backupObj, null, 2), 'application/json');
+  if (ok) alert('Single card backup downloaded:\n' + fileName);
+  else alert('Download failed. Browser ne block kiya ho sakta hai.');
+}
+function menuActionPinToggle() {
+  notes[selectedNoteIndexForContext].isPinned = !notes[selectedNoteIndexForContext].isPinned;
+  saveData();
+  renderNotes();
+  closeCardSettingMenu();
+}
 
 function menuActionDelete() {
   try {
+    closeCardSettingMenu();
     if (selectedNoteIndexForContext == null || selectedNoteIndexForContext < 0 || !notes[selectedNoteIndexForContext]) {
       alert('Card not found.');
       return;
@@ -2039,41 +2504,132 @@ function menuActionDelete() {
   }
 }
 
-function menuActionLock() { 
-  let note = notes.splice(selectedNoteIndexForContext, 1)[0]; 
-  lockedNotes.push(note); 
-  saveData(); renderNotes(); 
-  alert("कोड वॉलेट (Vault) में सुरक्षित लॉक हो गया है!"); 
+function menuActionLock() {
+  try { closeCardSettingMenu(); } catch (e) {}
+  let note = notes.splice(selectedNoteIndexForContext, 1)[0];
+  lockedNotes.push(note);
+  saveData(); renderNotes();
+  alert("कोड वॉलेट (Vault) में सुरक्षित लॉक हो गया है!");
+}
+
+function updateHomeMarkDeleteUI() {
+  try {
+    var btn = document.getElementById('delMarkBtn');
+    if (!btn) return;
+    var checked = document.querySelectorAll('.main-card-checkbox:checked');
+    var selectedCount = checked ? checked.length : 0;
+    if (isMarkDeleteMode) {
+      if (selectedCount > 0) {
+        btn.style.background = 'rgba(255,100,124,.2)';
+        btn.style.color = 'var(--red)';
+        btn.innerHTML = '<i class="fas fa-trash"></i> Confirm Delete';
+      } else {
+        btn.style.background = 'rgba(255,100,124,.12)';
+        btn.style.color = 'var(--red)';
+        btn.innerHTML = '<i class="fas fa-check-square"></i> Select';
+      }
+    } else {
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.innerHTML = '<i class="fas fa-check-square"></i> Mark Delete';
+    }
+  } catch (e) {}
 }
 
 function toggleMarkDeleteMode() {
-  isMarkDeleteMode = !isMarkDeleteMode;
-  const btn = document.getElementById('delMarkBtn');
   if (isMarkDeleteMode) {
-    btn.style.background = 'rgba(255,100,124,.2)'; btn.style.color = 'var(--red)';
-    btn.innerHTML = '<i class="fas fa-trash"></i> Confirm Delete';
-  } else {
-    btn.style.background = ''; btn.style.color = '';
-    btn.innerHTML = '<i class="fas fa-check-square"></i> Mark Delete';
-    let checked = document.querySelectorAll('.main-card-checkbox:checked');
-    if (checked.length > 0 && confirm('Move ' + checked.length + ' selected card(s) to Recovery?')) {
-      if (!Array.isArray(trashNotes)) trashNotes = [];
-      Array.from(checked).map(function(cb) { return parseInt(cb.dataset.index, 10); })
-        .filter(function(i) { return !isNaN(i); })
-        .sort(function(a, b) { return b - a; })
-        .forEach(function(i) {
-          if (i < 0 || i >= notes.length) return;
-          var dn = notes.splice(i, 1)[0];
-          if (!dn) return;
-          if (!dn.id) dn.id = generateUniqueId();
-          dn.deletedAt = Date.now();
-          trashNotes.unshift(dn);
-        });
-      try { saveData(); } catch (e) {}
-      try { renderExternalHistoryLogs(); } catch (e) {}
+    var checked = document.querySelectorAll('.main-card-checkbox:checked');
+    if (checked.length > 0) {
+      if (confirm('Move ' + checked.length + ' selected card(s) to Recovery?')) {
+        if (!Array.isArray(trashNotes)) trashNotes = [];
+        Array.from(checked).map(function(cb) { return parseInt(cb.dataset.index, 10); })
+          .filter(function(i) { return !isNaN(i); })
+          .sort(function(a, b) { return b - a; })
+          .forEach(function(i) {
+            if (i < 0 || i >= notes.length) return;
+            var dn = notes.splice(i, 1)[0];
+            if (!dn) return;
+            if (!dn.id) dn.id = generateUniqueId();
+            dn.deletedAt = Date.now();
+            trashNotes.unshift(dn);
+          });
+        try { saveData(); } catch (e) {}
+        try { renderExternalHistoryLogs(); } catch (e) {}
+      }
+      isMarkDeleteMode = false;
+      renderNotes();
+      updateHomeMarkDeleteUI();
+      return;
     }
+    /* No selection → exit mode */
+    isMarkDeleteMode = false;
+    renderNotes();
+    updateHomeMarkDeleteUI();
+    return;
   }
+  /* Enter select mode */
+  isMarkDeleteMode = true;
   renderNotes();
+  updateHomeMarkDeleteUI();
+}
+
+/** Long-press (~1s) on a card → show checkbox + select that card */
+function bindCardLongPress(card, onHold) {
+  if (!card || card.dataset.longPressBound === '1') return;
+  card.dataset.longPressBound = '1';
+  var timer = null;
+  var startX = 0, startY = 0;
+  var moved = false;
+  var HOLD_MS = 550;
+
+  function clearTimer() {
+    if (timer) { clearTimeout(timer); timer = null; }
+  }
+
+  function startHold(e) {
+    if (e.type === 'mousedown' && e.button !== 0) return;
+    moved = false;
+    clearTimer();
+    try {
+      var pt = e.touches && e.touches[0] ? e.touches[0] : e;
+      startX = pt.clientX || 0;
+      startY = pt.clientY || 0;
+    } catch (err) {}
+    timer = setTimeout(function() {
+      timer = null;
+      if (moved) return;
+      try {
+        if (navigator.vibrate) navigator.vibrate(30);
+      } catch (v) {}
+      if (typeof onHold === 'function') onHold(card);
+    }, HOLD_MS);
+  }
+
+  function moveHold(e) {
+    if (!timer) return;
+    try {
+      var pt = e.touches && e.touches[0] ? e.touches[0] : e;
+      var dx = Math.abs((pt.clientX || 0) - startX);
+      var dy = Math.abs((pt.clientY || 0) - startY);
+      if (dx > 12 || dy > 12) {
+        moved = true;
+        clearTimer();
+      }
+    } catch (err) {}
+  }
+
+  function endHold() {
+    clearTimer();
+  }
+
+  card.addEventListener('touchstart', startHold, { passive: true });
+  card.addEventListener('touchmove', moveHold, { passive: true });
+  card.addEventListener('touchend', endHold, { passive: true });
+  card.addEventListener('touchcancel', endHold, { passive: true });
+  card.addEventListener('mousedown', startHold);
+  card.addEventListener('mousemove', moveHold);
+  card.addEventListener('mouseup', endHold);
+  card.addEventListener('mouseleave', endHold);
 }
 
 function triggerCardAllDeleteAuth() {
@@ -2145,52 +2701,156 @@ function executeVerifiedAllDelete() {
   }
 }
 
+function updateRecoverySelectionUI() {
+  try {
+    var checked = document.querySelectorAll('.trash-card-checkbox:checked');
+    var selectedCount = checked ? checked.length : 0;
+    var selEl = document.getElementById('recoverySelectedCount');
+    if (selEl) selEl.textContent = String(selectedCount);
+    var cardsEl = document.getElementById('recoveryCardsCount');
+    if (cardsEl) cardsEl.textContent = String(trashNotes ? trashNotes.length : 0);
+    var selecting = !!(isTrashMarkDeleteMode || isTrashMarkRestoreMode);
+
+    /* Select → Confirm Delete jab koi card selected ho */
+    var markBtn = document.getElementById('trashMarkBtn');
+    if (markBtn) {
+      if (selecting && selectedCount > 0) {
+        markBtn.innerHTML = '<i class="fas fa-trash"></i> Confirm Delete';
+        markBtn.style.color = 'var(--red)';
+        markBtn.style.borderColor = 'rgba(255,100,124,.45)';
+        markBtn.style.background = 'rgba(255,100,124,.12)';
+      } else if (selecting) {
+        markBtn.innerHTML = '<i class="fas fa-check-square"></i> Select';
+        markBtn.style.color = '';
+        markBtn.style.borderColor = '';
+        markBtn.style.background = '';
+      } else {
+        markBtn.innerHTML = '<i class="fas fa-check-square"></i> Select';
+        markBtn.style.color = '';
+        markBtn.style.borderColor = '';
+        markBtn.style.background = '';
+      }
+    }
+
+    /* Restore → Confirm Restore jab koi card selected ho */
+    var restoreBtn = document.getElementById('trashRestoreMarkBtn');
+    if (restoreBtn) {
+      if (selecting && selectedCount > 0) {
+        restoreBtn.innerHTML = '<i class="fas fa-undo"></i> Confirm Restore';
+        restoreBtn.style.color = 'var(--green)';
+        restoreBtn.style.borderColor = 'rgba(76,227,168,.55)';
+        restoreBtn.style.background = 'rgba(76,227,168,.22)';
+      } else {
+        restoreBtn.innerHTML = '<i class="fas fa-undo"></i> Restore';
+        restoreBtn.style.color = 'var(--green)';
+        restoreBtn.style.borderColor = 'rgba(76,227,168,.35)';
+        restoreBtn.style.background = 'rgba(76,227,168,.15)';
+      }
+    }
+  } catch (e) {}
+}
+
+function getSelectedTrashIndexes() {
+  return Array.from(document.querySelectorAll('.trash-card-checkbox:checked')).map(function(cb) {
+    return Number(cb.dataset.index);
+  }).filter(function(n) { return Number.isInteger(n); }).sort(function(a, b) { return b - a; });
+}
+
 function toggleTrashMarkDeleteMode() {
-  isTrashMarkDeleteMode = !isTrashMarkDeleteMode;
-  isTrashMarkRestoreMode = false;
-  const delBtn = document.getElementById('trashMarkBtn');
-  const restoreBtn = document.getElementById('trashRestoreMarkBtn');
-  if (delBtn) delBtn.innerHTML = isTrashMarkDeleteMode ? '<i class="fas fa-trash"></i> Delete Selected' : '<i class="fas fa-check-square"></i> Mark Delete';
-  if (restoreBtn) restoreBtn.innerHTML = '<i class="fas fa-undo"></i> Mark Restore';
-  if (isTrashMarkDeleteMode) { openRecoveryView(); return; }
-  const indexes = Array.from(document.querySelectorAll('.trash-card-checkbox:checked')).map(cb => Number(cb.dataset.index)).filter(Number.isInteger).sort((a,b)=>b-a);
-  if (indexes.length && confirm(`Permanently delete ${indexes.length} selected item(s)?`)) {
-    indexes.forEach(i => { if (i >= 0 && i < trashNotes.length) trashNotes.splice(i,1); });
-    saveData();
+  var selecting = isTrashMarkDeleteMode || isTrashMarkRestoreMode;
+  var indexes = getSelectedTrashIndexes();
+
+  /* Confirm Delete when something selected */
+  if (selecting && indexes.length > 0) {
+    if (confirm('Permanently delete ' + indexes.length + ' selected card(s)? This cannot be undone.')) {
+      var removedIds = {};
+      indexes.forEach(function(i) {
+        if (i >= 0 && i < trashNotes.length) {
+          var gone = trashNotes.splice(i, 1)[0];
+          if (gone && gone.id) removedIds[String(gone.id)] = true;
+        }
+      });
+      if (Object.keys(removedIds).length) {
+        historyLogs = (historyLogs || []).filter(function(h) {
+          return !(h && h.noteId != null && removedIds[String(h.noteId)]);
+        });
+      }
+      try { saveData(); } catch (e) {}
+      try { renderExternalHistoryLogs(); } catch (e) {}
+    }
+    isTrashMarkDeleteMode = false;
+    isTrashMarkRestoreMode = false;
+    openRecoveryView();
+    return;
   }
+
+  if (selecting) {
+    /* No selection → exit select mode */
+    isTrashMarkDeleteMode = false;
+    isTrashMarkRestoreMode = false;
+    openRecoveryView();
+    return;
+  }
+
+  /* Enter select mode */
+  isTrashMarkDeleteMode = true;
+  isTrashMarkRestoreMode = false;
   openRecoveryView();
 }
+
 function toggleTrashMarkRestoreMode() {
-  isTrashMarkRestoreMode = !isTrashMarkRestoreMode;
-  isTrashMarkDeleteMode = false;
-  const delBtn = document.getElementById('trashMarkBtn');
-  const restoreBtn = document.getElementById('trashRestoreMarkBtn');
-  if (delBtn) delBtn.innerHTML = '<i class="fas fa-check-square"></i> Mark Delete';
-  if (restoreBtn) restoreBtn.innerHTML = isTrashMarkRestoreMode ? '<i class="fas fa-undo"></i> Restore Selected' : '<i class="fas fa-undo"></i> Mark Restore';
-  if (isTrashMarkRestoreMode) { openRecoveryView(); return; }
-  const indexes = Array.from(document.querySelectorAll('.trash-card-checkbox:checked')).map(cb => Number(cb.dataset.index)).filter(Number.isInteger).sort((a,b)=>b-a);
-  if (indexes.length && confirm('Restore ' + indexes.length + ' selected card(s) to the home page?')) {
-    indexes.forEach(function(i) {
-      if (i >= 0 && i < trashNotes.length) {
-        var note = trashNotes.splice(i, 1)[0];
-        if (!note) return;
-        delete note.deletedAt;
-        if (!note.id) note.id = generateUniqueId();
-        notes.unshift(note);
-        addHistoryLog(note.title, '', note.createdAtStr || note.updatedAt, note.updatedAt || new Date().toLocaleString(), note.updateCount || 1, note.id);
-      }
-    });
-    try { saveData(); } catch (e) {}
-    try { renderNotes(); } catch (e) {}
-    try { renderCategories(); } catch (e) {}
-    try { renderExternalHistoryLogs(); } catch (e) {}
+  var selecting = isTrashMarkDeleteMode || isTrashMarkRestoreMode;
+  var indexes = getSelectedTrashIndexes();
+
+  /* Confirm Restore when something selected */
+  if (selecting && indexes.length > 0) {
+    if (confirm('Restore ' + indexes.length + ' selected card(s) to the home page?')) {
+      indexes.forEach(function(i) {
+        if (i >= 0 && i < trashNotes.length) {
+          var note = trashNotes.splice(i, 1)[0];
+          if (!note) return;
+          delete note.deletedAt;
+          if (!note.id) note.id = generateUniqueId();
+          notes.unshift(note);
+          addHistoryLog(note.title, '', note.createdAtStr || note.updatedAt, note.updatedAt || new Date().toLocaleString(), note.updateCount || 1, note.id);
+        }
+      });
+      try { saveData(); } catch (e) {}
+      try { renderNotes(); } catch (e) {}
+      try { renderCategories(); } catch (e) {}
+      try { renderExternalHistoryLogs(); } catch (e) {}
+    }
+    isTrashMarkDeleteMode = false;
+    isTrashMarkRestoreMode = false;
+    openRecoveryView();
+    return;
   }
+
+  if (selecting) {
+    isTrashMarkDeleteMode = false;
+    isTrashMarkRestoreMode = false;
+    openRecoveryView();
+    return;
+  }
+
+  /* Enter select mode via Restore button */
+  isTrashMarkRestoreMode = true;
+  isTrashMarkDeleteMode = false;
   openRecoveryView();
 }
 
 function emptyTrashBin() {
-  if (confirm("क्या आप ट्रैश के सभी आइटम्स को हमेशा के लिए खाली करना चाहते हैं?")) {
-    trashNotes = []; saveData(); openRecoveryView();
+  var count = trashNotes ? trashNotes.length : 0;
+  if (!count) {
+    alert('Trash is already empty.');
+    return;
+  }
+  if (confirm('Delete All ' + count + ' card(s) permanently from Recovery?\n\nThis cannot be undone.')) {
+    trashNotes = [];
+    try { saveData(); } catch (e) {}
+    isTrashMarkDeleteMode = false;
+    isTrashMarkRestoreMode = false;
+    openRecoveryView();
   }
 }
 
@@ -2661,18 +3321,36 @@ function openRecoveryView() {
   var c = document.getElementById('recoveryContainer');
   if (!c) return;
 
-  /* Cache key: skip full rebuild if trash list unchanged (stops Recovery jank) */
-  var cacheKey = trashNotes.length + '|' + trashNotes.map(function(n){
+  var showChecks = !!(isTrashMarkDeleteMode || isTrashMarkRestoreMode);
+
+  /* Cache key includes mark mode so checkbox visibility always correct */
+  var cacheKey = trashNotes.length + '|' + (showChecks ? '1' : '0') + '|' + trashNotes.map(function(n){
     return (n.id || '') + ':' + (n.updatedAt || n.createdAtStr || '') + ':' + ((n.htmlCode||'').length);
   }).join(',');
   if (c.getAttribute('data-cache-key') === cacheKey && c.querySelector('.note-card')) {
-    /* Already rendered — just show, no re-download / re-iframe */
+    /* Already rendered — only refresh checkbox visibility + counts */
+    try {
+      c.querySelectorAll('.trash-card-checkbox').forEach(function(cb) {
+        cb.style.display = showChecks ? 'block' : 'none';
+        if (!showChecks) cb.checked = false;
+      });
+    } catch (e) {}
+    updateRecoverySelectionUI();
     return;
   }
   c.setAttribute('data-cache-key', cacheKey);
 
+  /* Always refresh counts */
+  try {
+    var cardsEl = document.getElementById('recoveryCardsCount');
+    if (cardsEl) cardsEl.textContent = String(trashNotes ? trashNotes.length : 0);
+    var selEl = document.getElementById('recoverySelectedCount');
+    if (selEl) selEl.textContent = '0';
+  } catch (e) {}
+
   if (!trashNotes.length) {
     c.innerHTML = '<div class="empty-notes"><p>Trash is empty. Deleted home cards will appear here.</p></div>';
+    updateRecoverySelectionUI();
     return;
   }
 
@@ -2687,7 +3365,7 @@ function openRecoveryView() {
     var card = document.createElement('div');
     card.className = 'note-card';
     card.innerHTML =
-      '<input type="checkbox" class="card-checkbox trash-card-checkbox" data-index="' + i + '" style="display:' + ((isTrashMarkDeleteMode || isTrashMarkRestoreMode) ? 'block' : 'none') + ';" onclick="event.stopPropagation()">' +
+      '<input type="checkbox" class="card-checkbox trash-card-checkbox" data-index="' + i + '" style="display:' + (showChecks ? 'block' : 'none') + ';" onclick="event.stopPropagation(); updateRecoverySelectionUI();" onchange="updateRecoverySelectionUI()">' +
       '<div class="card-cover-box">' +
         '<div class="html-preview-wrapper"><iframe loading="lazy" data-srcdoc="" title="preview"></iframe></div>' +
       '</div>' +
@@ -2709,10 +3387,30 @@ function openRecoveryView() {
       iframe.__previewCode = code;
       iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-modals');
     }
+    /* Long-press ~1s → show ticks + select this card; Confirm Delete / Confirm Restore buttons update */
+    bindCardLongPress(card, function(heldCard) {
+      try {
+        if (!isTrashMarkDeleteMode && !isTrashMarkRestoreMode) {
+          isTrashMarkDeleteMode = true;
+          isTrashMarkRestoreMode = false;
+        }
+        var show = true;
+        document.querySelectorAll('.trash-card-checkbox').forEach(function(cb) {
+          cb.style.display = 'block';
+        });
+        var thisCb = heldCard.querySelector('.trash-card-checkbox');
+        if (thisCb) {
+          thisCb.checked = true;
+          thisCb.style.display = 'block';
+        }
+        updateRecoverySelectionUI();
+      } catch (e) {}
+    });
     frag.appendChild(card);
   });
   c.innerHTML = '';
   c.appendChild(frag);
+  updateRecoverySelectionUI();
   /* Defer heavy iframe previews so UI feels instant */
   setTimeout(function(){
     try { if (typeof scheduleLazyCardPreviews === 'function') scheduleLazyCardPreviews(c); } catch (e) {}
@@ -2751,12 +3449,10 @@ function copyTrashNoteCode(index) {
 }
 
 function deleteMarkedTrashNotes() {
-  /* If not in mark mode, enable it. Second press / with selections deletes permanently. */
+  /* Compatibility: same as Confirm Delete path */
   if (!isTrashMarkDeleteMode) {
     isTrashMarkDeleteMode = true;
     isTrashMarkRestoreMode = false;
-    var markBtn = document.getElementById('trashMarkBtn');
-    if (markBtn) markBtn.innerHTML = '<i class="fas fa-check-square"></i> Mark Delete';
     openRecoveryView();
     return;
   }
@@ -2781,10 +3477,65 @@ function deleteMarkedTrashNotes() {
     });
   }
   isTrashMarkDeleteMode = false;
+  isTrashMarkRestoreMode = false;
   try { saveData(); } catch (e) {}
   try { renderExternalHistoryLogs(); } catch (e) {}
   openRecoveryView();
 }
+function sanitizeBackupFileName(name) {
+  var n = String(name || '').trim();
+  if (!n) n = 'IsrarLab_HTML_Vault_Backup';
+  n = n.replace(/[\\\/:*?"<>|]+/g, '_').replace(/\s+/g, '_');
+  n = n.replace(/\.json$/i, '');
+  if (!n) n = 'IsrarLab_HTML_Vault_Backup';
+  return n;
+}
+
+function getBackupFileNameFromInput() {
+  var input = document.getElementById('backupFileNameInput');
+  var base = input ? input.value : 'IsrarLab_HTML_Vault_Backup';
+  return sanitizeBackupFileName(base);
+}
+
+function updateBackupNamePreview() {
+  try {
+    var name = getBackupFileNameFromInput();
+    var el = document.getElementById('backupNamePreview');
+    if (el) {
+      el.innerHTML =
+        'Folder: <strong style="color:var(--cyan);">' + name + '/</strong><br>' +
+        'Backup: <strong style="color:var(--cyan);">' + name + '/' + name + '.json</strong><br>' +
+        'Download: <strong style="color:var(--cyan);">' + name + '.zip</strong>';
+    }
+    var stats = document.getElementById('backupStatsLine');
+    if (stats) {
+      stats.textContent = 'Main Codes: ' + (notes ? notes.length : 0) + ' | Vault Locked: ' + (lockedNotes ? lockedNotes.length : 0);
+    }
+  } catch (e) {}
+}
+
+/** Reliable file download (Blob) — works on mobile when data: URI fails */
+function downloadTextFile(filename, text, mime) {
+  try {
+    var blob = new Blob([text], { type: (mime || 'application/json') + ';charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+      try { URL.revokeObjectURL(url); } catch (e) {}
+      try { a.remove(); } catch (e) {}
+    }, 1500);
+    return true;
+  } catch (err) {
+    console.error('downloadTextFile', err);
+    return false;
+  }
+}
+
 function openBackupView() {
   setHomeChromeVisible(false);
   pushSubviewState('backup');
@@ -2796,46 +3547,160 @@ function openBackupView() {
   bak.style.display = 'flex';
   bak.style.pointerEvents = 'auto';
   bak.style.zIndex = '1000010';
-  let container = document.getElementById('backupContainer');
-  if (notes.length === 0 && lockedNotes.length === 0) {
-    container.innerHTML = `<div class="empty-notes"><p>कोई डेटा उपलब्ध नहीं है।</p></div>`;
-  } else {
-    container.innerHTML = `
-      <div class="note-card" style="height:auto; grid-column: 1 / -1; padding:16px;">
-        <h3 style="color:var(--cyan); font-size:14px; margin-bottom:6px;">📦 Total Backups Ready</h3>
-        <p style="font-size:11px; color:var(--muted); margin-bottom:12px;">Main Codes: ${notes.length} | Vault Locked: ${lockedNotes.length}</p>
-        <button class="recovery-btn-restore" style="width:100%; padding:10px;" onclick="exportJsonBackup()">Download JSON Backup File</button>
-      </div>`;
-  }
+  try {
+    var nameInput = document.getElementById('backupFileNameInput');
+    if (nameInput && !String(nameInput.value || '').trim()) {
+      nameInput.value = 'IsrarLab_HTML_Vault_Backup';
+    }
+  } catch (e) {}
+  updateBackupNamePreview();
+  /* No big middle card — only top buttons + file name */
+  try {
+    var container = document.getElementById('backupContainer');
+    if (container) {
+      container.innerHTML = '';
+      container.style.display = 'none';
+    }
+  } catch (e) {}
 }
 
 function exportJsonBackup() {
-  const backupObj = { app: "Israr Lab Multi HTML Viewer", version: "2.9", exportDate: new Date().toISOString(), notes, lockedNotes, categories, historyLogs };
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupObj, null, 2));
-  const downloadAnchor = document.createElement('a');
-  downloadAnchor.setAttribute("href", dataStr);
-  downloadAnchor.setAttribute("download", `IsrarLab_HTML_Vault_Backup_${Date.now()}.json`);
-  document.body.appendChild(downloadAnchor);
-  downloadAnchor.click(); downloadAnchor.remove();
-  alert("JSON Backup file generated & downloaded successfully!");
+  try {
+    var baseName = getBackupFileNameFromInput();
+    if (!baseName) baseName = 'IsrarLab_HTML_Vault_Backup';
+    var backupObj = {
+      app: 'Israr Lab Multi HTML Viewer',
+      version: '2.9',
+      type: 'full-backup',
+      exportDate: new Date().toISOString(),
+      notes: notes || [],
+      lockedNotes: lockedNotes || [],
+      categories: categories || [],
+      historyLogs: historyLogs || [],
+      trashNotes: (typeof trashNotes !== 'undefined' && trashNotes) ? trashNotes : []
+    };
+    var jsonText = JSON.stringify(backupObj, null, 2);
+    var mainCount = notes ? notes.length : 0;
+    var vaultCount = lockedNotes ? lockedNotes.length : 0;
+    var jsonFileName = baseName + '.json';
+
+    /* 1) Always download JSON immediately (sync) — works on mobile/Blogger gesture */
+    var jsonOk = downloadTextFile(jsonFileName, jsonText, 'application/json');
+
+    /* 2) Also try ZIP (folder/name.json inside) when JSZip is loaded */
+    if (typeof JSZip !== 'undefined') {
+      try {
+        var zip = new JSZip();
+        var folder = zip.folder(baseName);
+        if (folder) folder.file(baseName + '.json', jsonText);
+        else zip.file(baseName + '/' + baseName + '.json', jsonText);
+        zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } }).then(function(blob) {
+          try {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = baseName + '.zip';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function() {
+              try { URL.revokeObjectURL(url); } catch (e) {}
+              try { a.remove(); } catch (e) {}
+            }, 2500);
+          } catch (dlErr) {
+            console.error('ZIP download', dlErr);
+          }
+        }).catch(function(zipErr) {
+          console.error('ZIP generate', zipErr);
+        });
+      } catch (zipInitErr) {
+        console.error('JSZip init', zipInitErr);
+      }
+    }
+
+    if (jsonOk) {
+      alert('Backup ready!\n\nJSON: ' + jsonFileName + '\nZIP: ' + baseName + '.zip (agar browser ne allow kiya)\nFolder: ' + baseName + '/\nMain Codes: ' + mainCount + '\nVault Locked: ' + vaultCount);
+    } else {
+      /* Last-resort: open data URL / prompt */
+      try {
+        var dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonText);
+        var a2 = document.createElement('a');
+        a2.href = dataUri;
+        a2.download = jsonFileName;
+        document.body.appendChild(a2);
+        a2.click();
+        a2.remove();
+        alert('Backup download try kiya: ' + jsonFileName);
+      } catch (e2) {
+        alert('Backup download failed. Browser ne block kiya — permission / popup check karein.\nMain Codes: ' + mainCount);
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Backup error: ' + (err && err.message ? err.message : 'unknown'));
+  }
 }
 
 function loadFromFileBackup(event) {
-  const file = event.target.files[0];
+  var file = event.target.files && event.target.files[0];
   if (!file) return;
-  const reader = new FileReader();
+  var reader = new FileReader();
   reader.onload = function(e) {
     try {
-      const parsed = JSON.parse(e.target.result);
-      let importedNotes = parsed.notes || parsed;
-      if (Array.isArray(importedNotes)) { ensureNoteIds(importedNotes); notes = notes.concat(importedNotes); }
-      if (parsed.lockedNotes && Array.isArray(parsed.lockedNotes)) { ensureNoteIds(parsed.lockedNotes); lockedNotes = lockedNotes.concat(parsed.lockedNotes); }
-      if (parsed.categories && Array.isArray(parsed.categories)) { categories = Array.from(new Set(categories.concat(parsed.categories))); }
-      if (parsed.historyLogs && Array.isArray(parsed.historyLogs)) { historyLogs = historyLogs.concat(parsed.historyLogs); }
-      saveData(); renderNotes(); renderExternalHistoryLogs(); openBackupView();
-      alert("Backup successfully imported and restored!");
-    } catch(err) { alert("Invalid JSON backup file format!"); }
+      var parsed = JSON.parse(e.target.result);
+      var addedNotes = 0;
+      var addedVault = 0;
+
+      /* Full backup format */
+      if (parsed && Array.isArray(parsed.notes)) {
+        ensureNoteIds(parsed.notes);
+        notes = (notes || []).concat(parsed.notes);
+        addedNotes = parsed.notes.length;
+      } else if (Array.isArray(parsed)) {
+        /* Raw array of notes */
+        ensureNoteIds(parsed);
+        notes = (notes || []).concat(parsed);
+        addedNotes = parsed.length;
+      }
+
+      /* Single-card backup from Settings → Backup This Card */
+      if (parsed && parsed.type === 'single-card' && parsed.note) {
+        var one = parsed.note;
+        if (!Array.isArray(one)) {
+          ensureNoteIds([one]);
+          notes = (notes || []).concat([one]);
+          addedNotes += 1;
+        }
+      }
+
+      if (parsed && Array.isArray(parsed.lockedNotes)) {
+        ensureNoteIds(parsed.lockedNotes);
+        lockedNotes = (lockedNotes || []).concat(parsed.lockedNotes);
+        addedVault = parsed.lockedNotes.length;
+      }
+      if (parsed && Array.isArray(parsed.categories)) {
+        categories = Array.from(new Set((categories || []).concat(parsed.categories)));
+      }
+      if (parsed && Array.isArray(parsed.historyLogs)) {
+        historyLogs = (historyLogs || []).concat(parsed.historyLogs);
+      }
+      if (parsed && Array.isArray(parsed.trashNotes)) {
+        trashNotes = (trashNotes || []).concat(parsed.trashNotes);
+      }
+
+      saveData();
+      try { renderNotes(); } catch (e2) {}
+      try { renderExternalHistoryLogs(); } catch (e3) {}
+      try { if (typeof renderCategories === 'function') renderCategories(); } catch (e4) {}
+      updateBackupNamePreview();
+      alert('Import OK!\nCards added: ' + addedNotes + '\nVault added: ' + addedVault);
+    } catch (err) {
+      console.error(err);
+      alert('Invalid JSON backup file format!');
+    }
+    try { event.target.value = ''; } catch (e5) {}
   };
+  reader.onerror = function() { alert('File read failed.'); };
   reader.readAsText(file);
 }
 
@@ -3233,6 +4098,8 @@ function escapeHtml(str) {
   return String(str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
+
+/* ===== merged block: inline#15 ===== */
 (function(){
   /* Fast editor: never highlight on every keystroke. Colors paint after idle. */
   var paintQueued = false;
@@ -3374,7 +4241,8 @@ function escapeHtml(str) {
   window.addEventListener('load',bind);
 })();
 
-/* ----- script id: final-full-paste-and-scroll-sync ----- */
+
+/* ===== merged block: final-full-paste-and-scroll-sync ===== */
 (function(){
  function bindEditorFix(){
   const ta=document.getElementById('htmlCodeInput');
@@ -3401,7 +4269,8 @@ function escapeHtml(str) {
  window.addEventListener('load',bindEditorFix);
 })();
 
-/* ----- script id: israrlab-search-highlight-persistence-fix ----- */
+
+/* ===== merged block: israrlab-search-highlight-persistence-fix ===== */
 (function(){
   function getNodes(root){
     const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(n){return n.nodeValue&&n.nodeValue.length?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;}});
@@ -3485,7 +4354,8 @@ function escapeHtml(str) {
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindPaste);else bindPaste();window.addEventListener('load',bindPaste);
 })();
 
-/* ----- script id: final-editor-actions-fix ----- */
+
+/* ===== merged block: final-editor-actions-fix ===== */
 (function(){
   const ta=()=>document.getElementById('htmlCodeInput');
   let historyStack=[],historyIndex=-1,lastValue=null,restoring=false;
@@ -3513,7 +4383,8 @@ function escapeHtml(str) {
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();window.addEventListener('load',init);
 })();
 
-/* ----- script id: final-cursor-and-scroll-alignment-fix ----- */
+
+/* ===== merged block: final-cursor-and-scroll-alignment-fix ===== */
 (function(){
  function align(){
   const ta=document.getElementById('htmlCodeInput');
@@ -3537,7 +4408,8 @@ function escapeHtml(str) {
  window.addEventListener('load',align);
 })();
 
-/* ----- script id: requested-save-return-home-fix ----- */
+
+/* ===== merged block: requested-save-return-home-fix ===== */
 function saveAndReturnHome(){
   var ok = false;
   try { ok = executeAutoSave(); } catch (e) { console.error(e); }
@@ -3576,7 +4448,8 @@ function saveAndReturnHome(){
   goHome();
 }
 
-/* ----- script id: final-darkmode-home-reapply-fix ----- */
+
+/* ===== merged block: final-darkmode-home-reapply-fix ===== */
 (function(){
   /* Re-apply dark/light every time home is shown + on load */
   function reapply(){
@@ -3613,7 +4486,8 @@ function saveAndReturnHome(){
   }, 100);
 })();
 
-/* ----- script id: final-layout-sort-sync-fix ----- */
+
+/* ===== merged block: final-layout-sort-sync-fix ===== */
 (function(){
   function syncLayoutStatus(){
     try{
@@ -3631,7 +4505,8 @@ function saveAndReturnHome(){
   window.addEventListener('load', syncLayoutStatus);
 })();
 
-/* ----- script id: ultimate-persist-and-pagination-fix ----- */
+
+/* ===== merged block: ultimate-persist-and-pagination-fix ===== */
 (function(){
   function persistNow(){
     try { if (typeof saveData === 'function') saveData(); } catch(e) {}
@@ -3651,7 +4526,8 @@ function saveAndReturnHome(){
   });
 })();
 
-/* ----- script id: line-scroll-raf-bind ----- */
+
+/* ===== merged block: line-scroll-raf-bind ===== */
 (function(){
   function bind(){
     var ta = document.getElementById('htmlCodeInput');
@@ -3672,7 +4548,8 @@ function saveAndReturnHome(){
   window.addEventListener('load', bind);
 })();
 
-/* ----- script id: editor-hscroll-sync ----- */
+
+/* ===== merged block: editor-hscroll-sync ===== */
 (function(){
   function bind(){
     var ta = document.getElementById('htmlCodeInput');
@@ -3693,7 +4570,8 @@ function saveAndReturnHome(){
   window.addEventListener('load', bind);
 })();
 
-/* ----- script id: codemirror-editor-bootstrap ----- */
+
+/* ===== merged block: codemirror-editor-bootstrap ===== */
 (function(){
   var cmInstance = null;
   var cmReady = false;
