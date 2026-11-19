@@ -1,247 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Israr Tool Zone - Related Tools Section</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-<style>
-:root {
-  --bg: #0d1117; --panel-bg: #161b22; --card-bg: #161b22; --btn-bg: #21262d;
-  --accent: #3882F6; --orange-light: #9af5df; --text: #ffffff; --text2: #c9d1d9;
-  --border: rgba(56, 130, 246, 0.45); --grad: linear-gradient(115deg, #1d4ed8 0%, #3882F6 55%, #60a5fa 100%);
-  --glow: rgba(56,130,246,.3); --green: #00ff66;
-}
-* { box-sizing: border-box; }
-body { margin:0; padding:16px; background:var(--bg); color:var(--text); font-family:'IBM Plex Sans Condensed',sans-serif; }
-.related-tools-section { width: 100% !important; margin: 10px auto !important; background: var(--card-bg) !important; border: 1.5px solid var(--border) !important; border-radius: 12px !important; padding: 16px !important; box-shadow: 0 4px 12px rgba(0,0,0,.35) !important; position: relative; z-index: 2; }
-.related-search-wrap { position: relative; margin-bottom: 8px; width: 100%; }
-.related-search-input { width: 100%; padding: 11px 36px 11px 12px; border-radius: 8px; border: 1.2px solid var(--border); background: var(--bg); color: var(--text); font-size: 12px; outline: none; }
-.related-search-input:focus { border-color: var(--accent); box-shadow: 0 0 8px var(--glow); }
-.related-search-btn-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text2); cursor: pointer; font-size: 13px; }
-.search-suggestions-box { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--panel-bg); border: 1.2px solid var(--border); border-radius: 8px; max-height: 280px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-.search-suggestion-item { padding: 8px 12px; font-size: 11px; color: var(--text); cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.search-suggestion-item:hover { background: var(--grad); color: #fff; }
-.related-search-status { display: none; font-size: 11.5px; padding: 7px 10px; border: 1px solid var(--accent); border-radius: 7px; background: var(--panel-bg); color: var(--text); margin-bottom: 8px; }
-.related-search-status strong { color: var(--accent); }
-.related-search-count { color: var(--text2); font-size: 11px; margin: 0 0 10px; }
-.related-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; width: 100%; }
-@media(max-width: 380px) { .related-grid { grid-template-columns: 1fr; } }
-.related-card { background: var(--bg); border: 1.2px solid var(--border); border-radius: 10px; overflow: hidden; text-decoration: none; color: inherit; transition: .2s; display: flex; flex-direction: column; min-width: 0; }
-.related-card:hover { border-color: var(--accent); box-shadow: 0 0 10px var(--glow); transform: translateY(-2px); }
-.related-card.search-match { border: 2px solid var(--accent) !important; box-shadow: 0 0 0 2px var(--glow), 0 0 12px var(--glow) !important; }
-.related-card-image { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-bottom: 1.2px solid var(--border); background: #000; }
-.related-card-title { font-size: 11.5px; font-weight: 700; color: var(--text); padding: 8px 10px 4px; line-height: 1.35; }
-.related-card-title mark { background: rgba(255,133,0,0.25); color: var(--accent); border-radius: 3px; padding: 0 2px; }
-.related-card-stats { padding: 0 10px 10px; font-size: 9.5px; color: var(--text2); display: flex; flex-direction: column; gap: 3px; }
-
-#israr-lab-related-pagination { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 10px auto; flex-wrap: wrap; }
-.israr-lab-related-page-btn, .israr-lab-related-tab { border: 1.2px solid var(--border); background: var(--btn-bg); color: var(--text); border-radius: 8px; min-height: 32px; padding: 4px 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
-.israr-lab-related-page-btn.active, .israr-lab-related-tab.active, .israr-lab-related-page-btn:hover, .israr-lab-related-tab:hover { background: var(--grad); border-color: transparent; color: #fff; }
-.israr-lab-related-page-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-#israr-lab-related-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; width: 100%; margin: 0 auto 10px; }
-
-/* ========== ACTIVITY SECTION ========== */
-
-/* Force vertical stack when activity mode is active */
-.related-grid.activity-mode {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 8px !important;
-  grid-template-columns: none !important;
-}
-
-.israr-lab-activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 420px;
-  overflow-y: auto;
-  width: 100%;
-}
-
-/* Full width 70px height cards */
-.israr-lab-activity-row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 70px;
-  min-height: 70px;
-  max-height: 70px;
-  padding: 0 12px;
-  background: var(--bg);
-  border: 1.2px solid var(--border);
-  border-radius: 10px;
-  color: var(--text);
-  gap: 10px;
-  cursor: pointer;
-  transition: 0.15s;
-  overflow: hidden;
-}
-.israr-lab-activity-row:hover {
-  border-color: var(--accent);
-  box-shadow: 0 0 8px var(--glow);
-}
-.israr-lab-activity-row.selected {
-  border-color: #00ff66;
-  background: rgba(0,255,102,0.06);
-}
-
-.act-tick {
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
-  border-radius: 50%;
-  border: 1.5px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  color: transparent;
-  transition: 0.15s;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-.act-tick.mark-ready {
-  border-color: var(--accent);
-  box-shadow: 0 0 5px var(--glow);
-}
-.israr-lab-activity-row.selected .act-tick {
-  border-color: #00ff66;
-  background: #00ff66;
-  color: #000;
-  font-weight: 900;
-  box-shadow: 0 0 6px rgba(0,255,102,0.6);
-}
-
-.act-content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 3px;
-  overflow: hidden;
-}
-.act-time {
-  font-size: 10px;
-  color: var(--text2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.act-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--accent);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.3;
-}
-
-/* Top toolbar - 3 slim (patle) buttons in ONE horizontal line */
-.activity-toolbar {
-  display: flex;
-  flex-direction: row;
-  gap: 6px;
-  width: 100%;
-  margin-bottom: 4px;
-}
-.activity-toolbar button {
-  flex: 1;
-  border: 1px solid var(--border);
-  background: var(--btn-bg);
-  color: var(--text);
-  border-radius: 6px;
-  min-height: 26px;
-  height: 26px;
-  padding: 0 6px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-  cursor: pointer;
-  transition: 0.15s;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.activity-toolbar button:hover:not(:disabled) {
-  border-color: var(--accent);
-}
-.activity-toolbar .btn-back:hover:not(:disabled) {
-  background: var(--grad);
-  border-color: transparent;
-  color: #fff;
-}
-.activity-toolbar .btn-mark {
-  background: rgba(56,130,246,0.12);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-.activity-toolbar .btn-mark.active-mark {
-  background: rgba(0,255,102,0.14);
-  border-color: #00ff66;
-  color: #00ff66;
-}
-.activity-toolbar .btn-mark.confirm-mode {
-  background: rgba(255,80,80,0.16);
-  border-color: #ff5050;
-  color: #ff7070;
-}
-.activity-toolbar .btn-mark.confirm-mode:hover {
-  background: #ff5050;
-  color: #fff;
-}
-.activity-toolbar .btn-all-delete {
-  background: rgba(255,80,80,0.12);
-  border-color: rgba(255,80,80,0.5);
-  color: #ff7070;
-}
-.activity-toolbar .btn-all-delete:hover:not(:disabled) {
-  background: #ff5050;
-  color: #fff;
-  border-color: #ff5050;
-}
-
-/* Required animated indicator styles */
-@keyframes blinkOrangeFast { 0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 0 0 rgba(255,133,0,.85)} 50%{opacity:.2;transform:scale(.75);box-shadow:0 0 6px 2px rgba(255,133,0,.55)} }
-.live-dot-orange { display:inline-block;width:7px;height:7px;background:#ff8500;border-radius:50%;margin-right:5px;animation:blinkOrangeFast .42s steps(2,end) infinite;vertical-align:middle; }
-@keyframes pulseGreen { 0%{transform:scale(.9);opacity:.55;box-shadow:0 0 0 0 rgba(0,255,102,.75)} 50%{transform:scale(1.25);opacity:1;box-shadow:0 0 8px 3px rgba(0,255,102,.55)} 100%{transform:scale(.9);opacity:.55;box-shadow:0 0 0 0 rgba(0,255,102,0)} }
-.live-dot-green { display:inline-block;width:7px;height:7px;background:#00ff66;border-radius:50%;margin-right:5px;animation:pulseGreen 1.1s ease-in-out infinite;vertical-align:middle;box-shadow:0 0 6px rgba(0,255,102,.7); }
-@keyframes pulseBlue { 0%{transform:scale(.92);opacity:.7;box-shadow:0 0 0 0 rgba(56,189,248,.6)} 70%{transform:scale(1.15);opacity:1;box-shadow:0 0 0 4px rgba(56,189,248,0)} 100%{transform:scale(.92);opacity:.7;box-shadow:0 0 0 0 rgba(56,189,248,0)} }
-.live-dot-blue { display:inline-block;width:7px;height:7px;background:#38bdf8;border-radius:50%;margin-right:5px;animation:pulseBlue 1.5s infinite;vertical-align:middle; }
-</style>
-</head>
-<body>
-<!-- RELATED TOOLS SECTION - 57 TOOLS WITH LIVE STATS & PREV/NEXT PAGINATION -->
-<section class="related-tools-section" id="israr-lab-related-section">
-  <h2 style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:8px;"><i class="fas fa-tools"></i> Explore Related Free Tools</h2>
-  
-  <div class="related-search-wrap">
-    <input type="text" class="related-search-input" id="relatedSearchInput" placeholder="Search tools by name..." autocomplete="off">
-    <button type="button" class="related-search-btn-icon" id="relatedSearchButton" aria-label="Search tools"><i class="fas fa-search"></i></button>
-    <div class="search-suggestions-box" id="searchSuggestionsBox"></div>
-  </div>
-
-  <div id="relatedSearchStatus" class="related-search-status" aria-live="polite"></div>
-  <p class="related-search-count" id="relatedSearchCount">Showing tools</p>
-  <div class="related-grid" id="relatedToolsGrid"></div>
-  <div id="israr-lab-related-pagination" aria-label="Related tools pages"></div>
-  
-  <div id="israr-lab-related-tabs" aria-label="Related tools sorting">
-    <button class="israr-lab-related-tab active" data-mode="recent" onclick="setRelatedMode('recent')">Recent</button>
-    <button class="israr-lab-related-tab" data-mode="top" onclick="setRelatedMode('top')">Top</button>
-    <button class="israr-lab-related-tab" data-mode="ranking" onclick="setRelatedMode('ranking')">Ranking</button>
-    <button class="israr-lab-related-tab" data-mode="activity" onclick="setRelatedMode('activity')">Activity</button>
-  </div>
-</section>
-<script>
 function escapeHtml(str) {
   if(!str) return '';
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#039;');
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 }
 
 function getHostedPageUrl() {
@@ -350,8 +109,9 @@ const relatedBatchSize = 4;
 let relatedSearchResults = allRelatedTools.slice();
 
 // Activity selection state
-let activityMarkMode = false;   // true when Mark mode is active (individual ticks selectable)
+let activityMarkMode = false;
 let activitySelectedIds = new Set();
+
 
 // REAL-TIME STATS LOGIC FOR CARDS
 const liveStatsJitter = {};
@@ -364,14 +124,15 @@ allRelatedTools.forEach(t => {
   };
 });
 
+// Orange dot: fast views counter
 setInterval(() => {
   allRelatedTools.forEach(t => {
     const j = liveStatsJitter[t.url];
     j.dropCycle++;
-    if (j.dropCycle % 6 === 0) {
-      j.newUsersOffset -= (Math.floor(Math.random() * 3) + 3);
+    if (j.dropCycle % 8 === 0) {
+      j.newUsersOffset -= (Math.floor(Math.random() * 4) + 2);
     } else {
-      j.newUsersOffset += (Math.floor(Math.random() * 4) + 1);
+      j.newUsersOffset += (Math.floor(Math.random() * 14) + 6);
     }
   });
   document.querySelectorAll('.related-card').forEach(card => {
@@ -382,8 +143,9 @@ setInterval(() => {
       el.textContent = val.toLocaleString();
     }
   });
-}, 1400);
+}, 650);
 
+// Green dot (Active user): normal views counter
 setInterval(() => {
   allRelatedTools.forEach(t => {
     liveStatsJitter[t.url].activeUsersOffset += (Math.floor(Math.random() * 5) - 2);
@@ -398,9 +160,10 @@ setInterval(() => {
   });
 }, 3200);
 
+// Blue dot (Today views): faster than normal active counter
 setInterval(() => {
   allRelatedTools.forEach(t => {
-    liveStatsJitter[t.url].todayViewsIncrement += (Math.floor(Math.random() * 2) + 1);
+    liveStatsJitter[t.url].todayViewsIncrement += (Math.floor(Math.random() * 8) + 4);
   });
   document.querySelectorAll('.related-card').forEach(card => {
     const tool = allRelatedTools.find(x => x.url === card.href);
@@ -410,7 +173,27 @@ setInterval(() => {
       el.textContent = (base + liveStatsJitter[tool.url].todayViewsIncrement).toLocaleString();
     }
   });
-}, 5200);
+}, 1300);
+
+function spinButtonCircle(btn, callback) {
+  if (!btn || btn.dataset.spinning === '1') {
+    if (typeof callback === 'function') callback();
+    return;
+  }
+  btn.dataset.spinning = '1';
+  const spinner = document.createElement('span');
+  spinner.className = 'btn-loading-spinner';
+  btn.prepend(spinner);
+  setTimeout(() => {
+    spinner.remove();
+    btn.dataset.spinning = '0';
+    if (typeof callback === 'function') callback();
+  }, 1000);
+}
+
+window.handleTabClick = function(btn, mode) {
+  setRelatedMode(mode);
+};
 
 function getRelatedViews() {
   try { return JSON.parse(localStorage.getItem('israr_lab_related_views') || '{}'); } catch(e) { return {}; }
@@ -425,40 +208,83 @@ function trackRelatedVisit(tool) {
   } catch(e) {}
 }
 
-function saveRelatedSearchHistory(query) {
-  if (!query || !query.trim()) return;
-  let history = [];
-  try { history = JSON.parse(localStorage.getItem('israr_keyword_search_history') || '[]'); } catch(e) { history = []; }
-  history = history.filter(item => String(item).toLowerCase() !== query.toLowerCase());
-  history.unshift(query);
-  if (history.length > 100) history = history.slice(0, 100);
-  try { localStorage.setItem('israr_keyword_search_history', JSON.stringify(history)); } catch(e) {}
+function getSearchWordHistory() {
+  try {
+    const list = JSON.parse(localStorage.getItem('israr_keyword_search_history') || '[]');
+    return Array.isArray(list) ? list.map(x => String(x)).filter(Boolean) : [];
+  } catch(e) {
+    return [];
+  }
 }
 
-function showSearchSuggestions() {
+function saveRelatedSearchHistory(query) {
+  if (!query || !query.trim()) return [];
+  const clean = query.trim();
+  let history = getSearchWordHistory();
+  history = history.filter(item => item.toLowerCase() !== clean.toLowerCase());
+  history.unshift(clean);
+  if (history.length > 100) history = history.slice(0, 100);
+  try { localStorage.setItem('israr_keyword_search_history', JSON.stringify(history)); } catch(e) {}
+  return history;
+}
+
+let searchDropdownTimer = null;
+
+function hideSearchDropdown() {
   const box = document.getElementById('searchSuggestionsBox');
+  if (box) box.style.display = 'none';
+  if (searchDropdownTimer) {
+    clearTimeout(searchDropdownTimer);
+    searchDropdownTimer = null;
+  }
+}
+
+function updateSearchClearButton() {
+  const input = document.getElementById('relatedSearchInput');
+  const clearBtn = document.getElementById('relatedSearchClearBtn');
+  if (!input || !clearBtn) return;
+  clearBtn.style.display = input.value.length > 0 ? 'inline-flex' : 'none';
+}
+
+function showSearchSuggestions(filterByInput) {
+  const box = document.getElementById('searchSuggestionsBox');
+  const input = document.getElementById('relatedSearchInput');
   if (!box) return;
-  let history = [];
-  try { history = JSON.parse(localStorage.getItem('israr_keyword_search_history') || '[]'); } catch(e) { history = []; }
+  const query = filterByInput && input ? input.value.trim().toLowerCase() : '';
+  const history = getSearchWordHistory();
+  const list = query
+    ? history.filter(item => String(item).toLowerCase().includes(query))
+    : history;
+
+  if (query && !list.length) {
+    hideSearchDropdown();
+    return;
+  }
+
   box.innerHTML = '';
-  if (!history.length) {
+  if (!list.length) {
     box.innerHTML = '<div class="search-suggestion-item">No recent searches yet</div>';
   } else {
-    history.slice(0, 10).forEach(item => {
+    list.forEach(item => {
       const div = document.createElement('div');
       div.className = 'search-suggestion-item';
       div.textContent = item;
+      div.title = item;
       div.onmousedown = (e) => {
         e.preventDefault();
-        const input = document.getElementById('relatedSearchInput');
         if (input) input.value = item;
-        box.style.display = 'none';
-        filterRelatedTools(true);
+        updateSearchClearButton();
+        hideSearchDropdown();
+        filterRelatedTools(true, { recordHistory: true, showPopup: false });
       };
       box.appendChild(div);
     });
   }
   box.style.display = 'block';
+  if (searchDropdownTimer) clearTimeout(searchDropdownTimer);
+  searchDropdownTimer = setTimeout(() => {
+    hideSearchDropdown();
+  }, 5000);
 }
 
 function highlightRelatedTitle(title, query) {
@@ -554,9 +380,11 @@ function renderRelatedPagination(totalPages) {
   prevBtn.disabled = relatedCurrentPage <= 1;
   prevBtn.onclick = () => {
     if (relatedCurrentPage > 1) {
-      relatedCurrentPage--;
-      filterRelatedTools(false);
-      document.getElementById('israr-lab-related-section')?.scrollIntoView({ behavior: 'smooth' });
+      spinButtonCircle(prevBtn, () => {
+        relatedCurrentPage--;
+        filterRelatedTools(false);
+        document.getElementById('israr-lab-related-section')?.scrollIntoView({ behavior: 'smooth' });
+      });
     }
   };
   box.appendChild(prevBtn);
@@ -566,9 +394,11 @@ function renderRelatedPagination(totalPages) {
     b.className = 'israr-lab-related-page-btn' + (i === relatedCurrentPage ? ' active' : '');
     b.textContent = i;
     b.onclick = () => {
-      relatedCurrentPage = i;
-      filterRelatedTools(false);
-      document.getElementById('israr-lab-related-section')?.scrollIntoView({ behavior: 'smooth' });
+      spinButtonCircle(b, () => {
+        relatedCurrentPage = i;
+        filterRelatedTools(false);
+        document.getElementById('israr-lab-related-section')?.scrollIntoView({ behavior: 'smooth' });
+      });
     };
     box.appendChild(b);
   }
@@ -579,9 +409,11 @@ function renderRelatedPagination(totalPages) {
   nextBtn.disabled = relatedCurrentPage >= totalPages;
   nextBtn.onclick = () => {
     if (relatedCurrentPage < totalPages) {
-      relatedCurrentPage++;
-      filterRelatedTools(false);
-      document.getElementById('israr-lab-related-section')?.scrollIntoView({ behavior: 'smooth' });
+      spinButtonCircle(nextBtn, () => {
+        relatedCurrentPage++;
+        filterRelatedTools(false);
+        document.getElementById('israr-lab-related-section')?.scrollIntoView({ behavior: 'smooth' });
+      });
     }
   };
   box.appendChild(nextBtn);
@@ -603,11 +435,9 @@ window.toggleActivityMark = function() {
   if (!acts.length) return;
 
   if (!activityMarkMode) {
-    // Enable Mark mode WITHOUT selecting all items automatically
     activityMarkMode = true;
     activitySelectedIds.clear();
   } else {
-    // Already in Mark mode: if none selected, cancel Mark mode; otherwise delete only ticked ones
     if (activitySelectedIds.size === 0) {
       activityMarkMode = false;
       filterRelatedTools(false);
@@ -634,20 +464,12 @@ window.deleteAllActivities = function() {
   } catch(e) {}
 };
 
-window.handleActivityRowClick = function(e, id, url) {
-  if (activityMarkMode) {
-    window.toggleSingleActivity(e, id);
-    return;
-  }
-  window.open(url, '_blank');
-};
-
 window.toggleSingleActivity = function(e, id) {
-  e.stopPropagation();
-  e.preventDefault();
-  if (!activityMarkMode) {
-    activityMarkMode = true;
+  if (e) {
+    e.stopPropagation();
+    e.preventDefault();
   }
+  if (!activityMarkMode) return;
 
   const sid = String(id);
   if (activitySelectedIds.has(sid)) {
@@ -658,11 +480,25 @@ window.toggleSingleActivity = function(e, id) {
   filterRelatedTools(false);
 };
 
-window.filterRelatedTools = function(resetPage) {
+window.handleActivityRowClick = function(e, id, safeUrl) {
+  if (activityMarkMode) {
+    window.toggleSingleActivity(e, id);
+    return;
+  }
+  window.open(safeUrl, '_blank', 'noopener,noreferrer');
+};
+
+window.filterRelatedTools = function(resetPage, opts) {
+  const options = opts || {};
+  const recordHistory = options.recordHistory !== undefined ? options.recordHistory : false;
+  const showPopup = options.showPopup !== undefined ? options.showPopup : false;
+
   if (resetPage) relatedCurrentPage = 1;
   const input = document.getElementById('relatedSearchInput');
   const rawQuery = (input ? input.value : '').trim();
   const terms = rawQuery.toLowerCase().split(/\s+/).filter(Boolean);
+
+  updateSearchClearButton();
 
   relatedSearchResults = allRelatedTools.filter(t => {
     const title = String(t.title || '').toLowerCase();
@@ -675,9 +511,15 @@ window.filterRelatedTools = function(resetPage) {
     if (rawQuery) {
       status.style.display = 'block';
       status.innerHTML = 'Searched: <strong>' + escapeHtml(rawQuery) + '</strong> &nbsp;|&nbsp; Matching cards: <strong>' + relatedSearchResults.length + '</strong>';
-      saveRelatedSearchHistory(rawQuery);
+      if (recordHistory) {
+        saveRelatedSearchHistory(rawQuery);
+      }
+      if (showPopup) {
+        showSearchSuggestions(true);
+      }
     } else {
       status.style.display = 'none';
+      hideSearchDropdown();
     }
   }
 
@@ -685,7 +527,11 @@ window.filterRelatedTools = function(resetPage) {
     const grid = document.getElementById('relatedToolsGrid');
     grid.classList.add('activity-mode');
     const acts = window.getRelatedActivity();
-    if (count) count.textContent = 'Activity history: ' + acts.length + ' records';
+    if (count) {
+      count.textContent = activityMarkMode
+        ? ('Selected: ' + activitySelectedIds.size + ' of ' + acts.length)
+        : ('Activity history: ' + acts.length + ' records');
+    }
 
     if (!acts.length) {
       grid.innerHTML = `
@@ -697,24 +543,11 @@ window.filterRelatedTools = function(resetPage) {
         <div style="color:var(--text2);font-size:12px;padding:30px 10px;text-align:center;">No activity recorded yet.</div>
       `;
     } else {
-      const selectedCount = activitySelectedIds.size;
-      let markBtnClass = 'btn-mark';
-      let markBtnText = 'Mark';
-      if (activityMarkMode) {
-        if (selectedCount > 0) {
-          markBtnClass = 'btn-mark confirm-mode';
-          markBtnText = 'Delete (' + selectedCount + ')';
-        } else {
-          markBtnClass = 'btn-mark active-mark';
-          markBtnText = 'Cancel Mark';
-        }
-      }
-
       let html = `
         <div class="activity-toolbar">
           <button class="btn-back" onclick="setRelatedMode('recent')">← Back</button>
-          <button class="${markBtnClass}" onclick="toggleActivityMark()">
-            ${markBtnText}
+          <button class="btn-mark ${activityMarkMode ? 'confirm-mode' : ''}" onclick="toggleActivityMark()">
+            ${activityMarkMode ? ('Confirm Delete (' + activitySelectedIds.size + ')') : 'Mark'}
           </button>
           <button class="btn-all-delete" onclick="deleteAllActivities()">All Delete</button>
         </div>
@@ -729,8 +562,8 @@ window.filterRelatedTools = function(resetPage) {
 
         html += `
           <div class="israr-lab-activity-row ${isSelected ? 'selected' : ''}" 
-               onclick="handleActivityRowClick(event, ${a.id}, '${escapeHtml(safeActUrl)}')">
-            <div class="act-tick ${activityMarkMode ? 'mark-ready' : ''}" onclick="toggleSingleActivity(event, ${a.id})">
+               onclick="handleActivityRowClick(event, '${escapeHtml(String(a.id))}', '${escapeHtml(safeActUrl)}')">
+            <div class="act-tick" onclick="toggleSingleActivity(event, '${escapeHtml(String(a.id))}')">
               ${isSelected ? '✓' : ''}
             </div>
             <div class="act-content">
@@ -779,22 +612,63 @@ window.setRelatedMode = function(mode) {
 };
 
 const relatedInput = document.getElementById('relatedSearchInput');
+const relatedClearBtn = document.getElementById('relatedSearchClearBtn');
+const relatedSearchBtn = document.getElementById('relatedSearchButton');
+
 if (relatedInput) {
-  relatedInput.addEventListener('input', () => filterRelatedTools(true));
-  relatedInput.addEventListener('focus', showSearchSuggestions);
-  relatedInput.addEventListener('click', showSearchSuggestions);
+  relatedInput.addEventListener('input', () => {
+    updateSearchClearButton();
+    const val = relatedInput.value.trim();
+    if (!val) {
+      hideSearchDropdown();
+      filterRelatedTools(true, { recordHistory: false, showPopup: false });
+    } else {
+      filterRelatedTools(true, { recordHistory: false, showPopup: true });
+    }
+  });
+  relatedInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      filterRelatedTools(true, { recordHistory: true, showPopup: true });
+    }
+  });
+  relatedInput.addEventListener('blur', () => {
+    if (relatedInput.value.trim()) {
+      filterRelatedTools(false, { recordHistory: true, showPopup: false });
+    }
+  });
+  relatedInput.addEventListener('focus', () => showSearchSuggestions(false));
+  relatedInput.addEventListener('click', () => showSearchSuggestions(false));
+}
+
+if (relatedClearBtn) {
+  relatedClearBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (relatedInput) {
+      relatedInput.value = '';
+      relatedInput.focus();
+    }
+    updateSearchClearButton();
+    hideSearchDropdown();
+    filterRelatedTools(true, { recordHistory: false, showPopup: false });
+  });
+}
+
+if (relatedSearchBtn) {
+  relatedSearchBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    filterRelatedTools(true, { recordHistory: true, showPopup: true });
+  });
 }
 
 document.addEventListener('click', (e) => {
   const box = document.getElementById('searchSuggestionsBox');
   const input = document.getElementById('relatedSearchInput');
   if (box && input && !box.contains(e.target) && e.target !== input) {
-    box.style.display = 'none';
+    hideSearchDropdown();
   }
 });
 
 // Initial render
-filterRelatedTools(true);
-</script>
-</body>
-</html>
+filterRelatedTools(true, { recordHistory: false, showPopup: false });
