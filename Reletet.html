@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Israr Tool Zone - Related Tools Section</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117; --panel-bg: #161b22; --card-bg: #161b22; --btn-bg: #21262d;
+  --accent: #3882F6; --orange-light: #9af5df; --text: #ffffff; --text2: #c9d1d9;
+  --border: rgba(56, 130, 246, 0.45); --grad: linear-gradient(115deg, #1d4ed8 0%, #3882F6 55%, #60a5fa 100%);
+  --glow: rgba(56,130,246,.3); --green: #00ff66;
+}
+* { box-sizing: border-box; }
+body { margin:0; padding:16px; background:var(--bg); color:var(--text); font-family:'IBM Plex Sans Condensed',sans-serif; }
+.related-tools-section { width: 100% !important; margin: 10px auto !important; background: var(--card-bg) !important; border: 1.5px solid var(--border) !important; border-radius: 12px !important; padding: 16px !important; box-shadow: 0 4px 12px rgba(0,0,0,.35) !important; position: relative; z-index: 2; }
+.related-search-wrap { position: relative; margin-bottom: 8px; width: 100%; }
+.related-search-input { width: 100%; padding: 11px 36px 11px 12px; border-radius: 8px; border: 1.2px solid var(--border); background: var(--bg); color: var(--text); font-size: 12px; outline: none; }
+.related-search-input:focus { border-color: var(--accent); box-shadow: 0 0 8px var(--glow); }
+.related-search-btn-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text2); cursor: pointer; font-size: 13px; }
+.search-suggestions-box { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--panel-bg); border: 1.2px solid var(--border); border-radius: 8px; max-height: 280px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+.search-suggestion-item { padding: 8px 12px; font-size: 11px; color: var(--text); cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.search-suggestion-item:hover { background: var(--grad); color: #fff; }
+.related-search-status { display: none; font-size: 11.5px; padding: 7px 10px; border: 1px solid var(--accent); border-radius: 7px; background: var(--panel-bg); color: var(--text); margin-bottom: 8px; }
+.related-search-status strong { color: var(--accent); }
+.related-search-count { color: var(--text2); font-size: 11px; margin: 0 0 10px; }
+.related-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; width: 100%; }
+@media(max-width: 380px) { .related-grid { grid-template-columns: 1fr; } }
+.related-card { background: var(--bg); border: 1.2px solid var(--border); border-radius: 10px; overflow: hidden; text-decoration: none; color: inherit; transition: .2s; display: flex; flex-direction: column; min-width: 0; }
+.related-card:hover { border-color: var(--accent); box-shadow: 0 0 10px var(--glow); transform: translateY(-2px); }
+.related-card.search-match { border: 2px solid var(--accent) !important; box-shadow: 0 0 0 2px var(--glow), 0 0 12px var(--glow) !important; }
+.related-card-image { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-bottom: 1.2px solid var(--border); background: #000; }
+.related-card-title { font-size: 11.5px; font-weight: 700; color: var(--text); padding: 8px 10px 4px; line-height: 1.35; }
+.related-card-title mark { background: rgba(255,133,0,0.25); color: var(--accent); border-radius: 3px; padding: 0 2px; }
+.related-card-stats { padding: 0 10px 10px; font-size: 9.5px; color: var(--text2); display: flex; flex-direction: column; gap: 3px; }
+
+#israr-lab-related-pagination { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 10px auto; flex-wrap: wrap; }
+.israr-lab-related-page-btn, .israr-lab-related-tab { border: 1.2px solid var(--border); background: var(--btn-bg); color: var(--text); border-radius: 8px; min-height: 32px; padding: 4px 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
+.israr-lab-related-page-btn.active, .israr-lab-related-tab.active, .israr-lab-related-page-btn:hover, .israr-lab-related-tab:hover { background: var(--grad); border-color: transparent; color: #fff; }
+.israr-lab-related-page-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+#israr-lab-related-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; width: 100%; margin: 0 auto 10px; }
+
+/* ========== ACTIVITY SECTION ========== */
+
+/* Force vertical stack when activity mode is active */
+.related-grid.activity-mode {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  grid-template-columns: none !important;
+}
+
+.israr-lab-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 420px;
+  overflow-y: auto;
+  width: 100%;
+}
+
+/* Full width 70px height cards */
+.israr-lab-activity-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 70px;
+  min-height: 70px;
+  max-height: 70px;
+  padding: 0 12px;
+  background: var(--bg);
+  border: 1.2px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  gap: 10px;
+  cursor: pointer;
+  transition: 0.15s;
+  overflow: hidden;
+}
+.israr-lab-activity-row:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 8px var(--glow);
+}
+.israr-lab-activity-row.selected {
+  border-color: #00ff66;
+  background: rgba(0,255,102,0.06);
+}
+
+.act-tick {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: transparent;
+  transition: 0.15s;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.act-tick.mark-ready {
+  border-color: var(--accent);
+  box-shadow: 0 0 5px var(--glow);
+}
+.israr-lab-activity-row.selected .act-tick {
+  border-color: #00ff66;
+  background: #00ff66;
+  color: #000;
+  font-weight: 900;
+  box-shadow: 0 0 6px rgba(0,255,102,0.6);
+}
+
+.act-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  overflow: hidden;
+}
+.act-time {
+  font-size: 10px;
+  color: var(--text2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.act-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+/* Top toolbar - 3 slim (patle) buttons in ONE horizontal line */
+.activity-toolbar {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  width: 100%;
+  margin-bottom: 4px;
+}
+.activity-toolbar button {
+  flex: 1;
+  border: 1px solid var(--border);
+  background: var(--btn-bg);
+  color: var(--text);
+  border-radius: 6px;
+  min-height: 26px;
+  height: 26px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: 0.15s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.activity-toolbar button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.activity-toolbar .btn-back:hover:not(:disabled) {
+  background: var(--grad);
+  border-color: transparent;
+  color: #fff;
+}
+.activity-toolbar .btn-mark {
+  background: rgba(56,130,246,0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.activity-toolbar .btn-mark.active-mark {
+  background: rgba(0,255,102,0.14);
+  border-color: #00ff66;
+  color: #00ff66;
+}
+.activity-toolbar .btn-mark.confirm-mode {
+  background: rgba(255,80,80,0.16);
+  border-color: #ff5050;
+  color: #ff7070;
+}
+.activity-toolbar .btn-mark.confirm-mode:hover {
+  background: #ff5050;
+  color: #fff;
+}
+.activity-toolbar .btn-all-delete {
+  background: rgba(255,80,80,0.12);
+  border-color: rgba(255,80,80,0.5);
+  color: #ff7070;
+}
+.activity-toolbar .btn-all-delete:hover:not(:disabled) {
+  background: #ff5050;
+  color: #fff;
+  border-color: #ff5050;
+}
+
+/* Required animated indicator styles */
+@keyframes blinkOrangeFast { 0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 0 0 rgba(255,133,0,.85)} 50%{opacity:.2;transform:scale(.75);box-shadow:0 0 6px 2px rgba(255,133,0,.55)} }
+.live-dot-orange { display:inline-block;width:7px;height:7px;background:#ff8500;border-radius:50%;margin-right:5px;animation:blinkOrangeFast .42s steps(2,end) infinite;vertical-align:middle; }
+@keyframes pulseGreen { 0%{transform:scale(.9);opacity:.55;box-shadow:0 0 0 0 rgba(0,255,102,.75)} 50%{transform:scale(1.25);opacity:1;box-shadow:0 0 8px 3px rgba(0,255,102,.55)} 100%{transform:scale(.9);opacity:.55;box-shadow:0 0 0 0 rgba(0,255,102,0)} }
+.live-dot-green { display:inline-block;width:7px;height:7px;background:#00ff66;border-radius:50%;margin-right:5px;animation:pulseGreen 1.1s ease-in-out infinite;vertical-align:middle;box-shadow:0 0 6px rgba(0,255,102,.7); }
+@keyframes pulseBlue { 0%{transform:scale(.92);opacity:.7;box-shadow:0 0 0 0 rgba(56,189,248,.6)} 70%{transform:scale(1.15);opacity:1;box-shadow:0 0 0 4px rgba(56,189,248,0)} 100%{transform:scale(.92);opacity:.7;box-shadow:0 0 0 0 rgba(56,189,248,0)} }
+.live-dot-blue { display:inline-block;width:7px;height:7px;background:#38bdf8;border-radius:50%;margin-right:5px;animation:pulseBlue 1.5s infinite;vertical-align:middle; }
+</style>
+</head>
+<body>
+<!-- RELATED TOOLS SECTION - 57 TOOLS WITH LIVE STATS & PREV/NEXT PAGINATION -->
+<section class="related-tools-section" id="israr-lab-related-section">
+  <h2 style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:8px;"><i class="fas fa-tools"></i> Explore Related Free Tools</h2>
+  
+  <div class="related-search-wrap">
+    <input type="text" class="related-search-input" id="relatedSearchInput" placeholder="Search tools by name..." autocomplete="off">
+    <button type="button" class="related-search-btn-icon" id="relatedSearchButton" aria-label="Search tools"><i class="fas fa-search"></i></button>
+    <div class="search-suggestions-box" id="searchSuggestionsBox"></div>
+  </div>
+
+  <div id="relatedSearchStatus" class="related-search-status" aria-live="polite"></div>
+  <p class="related-search-count" id="relatedSearchCount">Showing tools</p>
+  <div class="related-grid" id="relatedToolsGrid"></div>
+  <div id="israr-lab-related-pagination" aria-label="Related tools pages"></div>
+  
+  <div id="israr-lab-related-tabs" aria-label="Related tools sorting">
+    <button class="israr-lab-related-tab active" data-mode="recent" onclick="setRelatedMode('recent')">Recent</button>
+    <button class="israr-lab-related-tab" data-mode="top" onclick="setRelatedMode('top')">Top</button>
+    <button class="israr-lab-related-tab" data-mode="ranking" onclick="setRelatedMode('ranking')">Ranking</button>
+    <button class="israr-lab-related-tab" data-mode="activity" onclick="setRelatedMode('activity')">Activity</button>
+  </div>
+</section>
+<script>
+function escapeHtml(str) {
+  if(!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+function getHostedPageUrl() {
+  try {
+    if (window.top && window.top.location && /^https?:\/\//i.test(window.top.location.href)) {
+      return window.top.location.href.split('#')[0];
+    }
+  } catch(e) {}
+  try {
+    if (window.parent && window.parent.location && /^https?:\/\//i.test(window.parent.location.href)) {
+      return window.parent.location.href.split('#')[0];
+    }
+  } catch(e) {}
+  if (document.referrer && /^https?:\/\//i.test(document.referrer)) {
+    return document.referrer.split('#')[0];
+  }
+  if (/^https?:\/\//i.test(window.location.href)) {
+    return window.location.href.split('#')[0];
+  }
+  return '';
+}
+
+window.getRelatedActivity = function() {
+  try { return JSON.parse(localStorage.getItem('israr_lab_related_activity') || '[]'); } catch(e) { return []; }
+};
+
+window.addUserActivity = function(title, urlText, category) {
+  try {
+    let list = window.getRelatedActivity();
+    list.unshift({
+      id: Date.now(),
+      title: title || 'Tool Usage',
+      url: urlText || getHostedPageUrl() || 'https://isrartoolzone.blogspot.com/',
+      category: category || 'Legal',
+      timestamp: new Date().toISOString()
+    });
+    if(list.length > 150) list.pop();
+    localStorage.setItem('israr_lab_related_activity', JSON.stringify(list));
+  } catch(e) {}
+};
+
+/* ===== EXACT ALL 57 RELATED TOOLS COMPLETE LIST ===== */
+const allRelatedTools=[
+  { title: "Premium Verification Gateway Generator Free Israr Tool Zone", url: "https://isrartoolzone.blogspot.com/p/premium-verification-gateway-generator.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjyNHf1cvZ4zYVwta08SwZ5V8fBQMpH1pDrxyDqGGrZUVIzxLMycosCZUpraDTfLXAd8RiAbY-F8GaNcilIwOZoYVtSYJwrzGmz4PsFUwYvDqnOE6ZI6IeHS2Sq4h7RGKIt14AUVAdm5XyS_c2dHexdU_h_jHwUhIqIKa2umt9nAk_BhAn0q3eR3Vy5mt8/s1376/85793.jpg", views: 14200, active: 6200 },
+  { title: "Article Divider - Split Text Into 200+", url: "https://isrartoolzone.blogspot.com/p/article-divider-split-text-into-200.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhJiYmkQQaUiGo3G17Gqf7jRZGBgHuv8fquhNiLk-Rj8Lniqg-6Q0qOLq7VyFRWpPokU62kRfRuQoyldTvSHZuuROKsR7pHg7FigUrm-BS5P3sAlNUW7cfaALRRifdrXah-BLo8jo0eBOiKgqcgeg2Ld5c80Dv7qcayn5U6To_aV6mc21pmJEjlVn65fhg/s1024/A_luxurious,_ultra-modern_crea_330810882%20(1).jpeg", views: 18500, active: 8100 },
+  { title: "Email Generator - Unlimited Custom Emails", url: "https://isrartoolzone.blogspot.com/p/email-generator-unlimited-custom-emails.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhh6I0x3O0sjuxMKHeFiANLLdPaHqRu26l2sS5K4ACJTUQlgAFn5_LWdzhhVg05saFzQzEMmToy4Ba1Wvd3i7cBFnrAZ8EmoeD4g3PuYiWgoiPVdAbKPZpAFQRks0FVG67weHo6LrlyJLnRj3q7WDlSCK4hWziDK33el4JjlVEH1Qw0f7M5EvpYtZdU4bY/s944/Futuristic_premium_studio_with_8830680.jpeg", views: 12100, active: 5300 },
+  { title: "AI Images Generator - Text to Image", url: "https://isrartoolzone.blogspot.com/p/ai-images-generator-text-to-image.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjvpnQrD15qS57_HoLip6Wf7PLVzNMTxZjbzGxqLOvQls43Y-8fCR1uyiAxwM3KfuoSyoAiwod0UDj69QNw9UXzbKi321KIRzfTt0zcKxVHEalnOtVWBQGTSMfVlLNjSlBSYF1BR_za4iaIs_SJtHAvaldoQROZFb-gjRnL5kh9m64NGbbA08NooxTWE_VW/s1024/A_modern,_futuristic_tech_678662982.png", views: 22400, active: 9400 },
+  { title: "AI Creative Suite - Free Text to Image", url: "https://isrartoolzone.blogspot.com/p/ai-creative-suite-free-text-to-image.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhoY2lysf4-5Q9AoE7vGmodh1bMVuziRNDRqzQ6vbhN3iK5rfyokOzEVt7Ur4jWE5LN2NXzTT8Pcyjr124LFA97i70lZgwnHr5IJpuByJupSR8S_8iLvG2DzugdwgyOCBTKEIclcSp5M8yNKbB3e4BTOUUcG9pqd-6pMmUSpmBzD6GEcu9pZZBzrfzQPSZi/s1704/A_futuristic_3D_studio_interio_685484605.png.jpg", views: 15400, active: 7200 },
+  { title: "AI Art Generator - Text to Image Free", url: "https://isrartoolzone.blogspot.com/p/ai-art-generator-text-to-image-free.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhUlv-vYxogNx95PW4h5NC5nyskjIrrixgkq7FqxBS5BWcTRPMe3ChuER0Oc-OhYGz7ezVLwGPUww8vxBQbx0QBd50Ya_njJ4efGAhMnb_7-1vAQJGwSLPAkhI9W0ETSd-QLvxVs1fPmV2OiCoaiHauTvR2lVDiBaEnPyCfJfNPJwQ0cDo1rg3vJYYiVI0/s1024/generated_image_1756796196225.png.jpg", views: 19800, active: 8500 },
+  { title: "AI Code Builder - Free No API Key", url: "https://isrartoolzone.blogspot.com/p/ai-code-builder-free-no-api-key-israr.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhUJdq45TV9gQfwJj6TAs666cFvPR5YC3fL9-RgkpkwFdXRWBsY62mceGmqpF5vZlYOif4OG3oqG8h2kTt1vu0ifusrrG2mppCfmAE3jBBX38qDBnyPQToRQ4ukHvuCXhcTwgV7jJkdCOQm_gi5zWWYdYc4B3Lpn1a4digH87pVrRZOUz6GVo0W4UnWjHSz/s1024/A_futuristic_3D_tech_work_925742714.png.jpg", views: 16700, active: 7400 },
+  { title: "Paste to Link Generator Code Share", url: "https://isrartoolzone.blogspot.com/p/paste-to-link-generator-code-share.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEivxdWKmsx-QRj4ecXe5voulhXKyxwRLJT-6QQl3TqKvnM_8rj4ouN2j9IDlgtt_ANwNwOuxE1OM1YS-fYTIvwwpQSZgVUV6c361LKgIq_sj9qmD17DuqQvhJ508xAA-ixq7Dy_N6D1J-5xCtugUgFTaHV10zKxDAAMBgOD2XpGtpTJcRE9omJG5Obc1JE/s1024/Ultra-realistic_8K_3D_futurist_474969675%20(1).jpeg", views: 11200, active: 4900 },
+  { title: "URL Shortener Short Link QR Generator", url: "https://isrartoolzone.blogspot.com/p/url-shortener-short-link-qr-generator.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiyaFKUeZY-0PjkvG_CK_viHaM_GvDEf8ky9hPZAcY3pg3HumBnU8n1Ai8ebb5dxBIDztT5VO2iTR4snFxuy0YRSU3X18RcQ6yp5adGAq40I1r7BfKHKpMzKVCwqENQrixY8eyq1I2graCfiI5k8e2xiwV_dLxFQQM4lyHeZlG2rco-EMPX3SJPHk7iZ6RB/s1024/A_stylish_young_woman_sta_518554105.png", views: 25100, active: 10200 },
+  { title: "Advance HTML Viewer Code Live Preview", url: "https://isrartoolzone.blogspot.com/p/advance-html-viewer-code-live-preview.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEia8mazQu3xBBGmE4v0pcYe2wO45RCzWfLLSkSeAPkR5uEBVN96pVyQIQgRKp_v4CxJK6IqFLLYSoBfRZ4ZfwhZPkEtHjDSAFLjifAiv6nbJckI5aKz3r1b6UPczwZ0lmvl8_sHbOUSdDf2oPC2Soku4GAkDe2jRkWatGWo_wbhJ92Y-TkmnY_IWDpQSEjz/s1024/A_modern_classroom_design_252651673.png", views: 13400, active: 5800 },
+  { title: "HTML Viewer Live Preview Tool Online", url: "https://isrartoolzone.blogspot.com/p/html-viewer-live-preview-tool-online.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhYVaagKHgwBPn5rfvIkedoaSLNBoUvDBuaJjRrABJY8BE7qEg5o5a48V-1EdkmuYxkwy7CrL68W9WSV2F9tHGduoATkkjLzWGcflY3t83rno6d1EHvKlfobLpdb2pq9ySV1_RMB40SMFeFppQzsuFkY5BIe3WazFZX3BHnB13AppIr8Usdf-OUxFw9u3dH/s1024/A_modern_tech_workspace_r_226046361.png.jpg", views: 14500, active: 6100 },
+  { title: "Text to Speech Speech to Text Voice", url: "https://isrartoolzone.blogspot.com/p/text-to-speech-speech-to-text-voice.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgW2gC5TSitsAPJ0vUivjkW4kAlGEhpXUR6SxMR9_lRSroWyhefH6CFjrXiasDyhOH4YGM6jF2P3nM8iVOzoKReNiQ2k2LbcXTQAL5xO0DGy4u2sTz-KfVAx4k5u_Zw7JInjOgbf2DxEoIvuxReyxmyZ_1lPElc4hQu1E4T491LFMH-0wpcTommB_YmR76k/s1024/A_realistic_tech_workspac_333279290.png.jpg", views: 17200, active: 7500 },
+  { title: "Word Counter Character Count Tool", url: "https://isrartoolzone.blogspot.com/p/word-counter-character-count-tool.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhqnd4EAAHU6YXpK4t30tBYnXDi60ZdIzWU7zbRQuyHeX4s56PRib4ee25efh-ayNvgvV_ZprfY7lroRR_hR8yhZTWch789cwV-rV6gROSzexsp3RG0F75UyNOhRFObEVkgAOzF3jPoMUHPi1u86xakEgw9H8x_y8UGT4C4HIaMKcJbgChXZD2DTpY2WbPw/s1024/A_modern_workspace_setup__236130886.png.jpg", views: 16100, active: 6800 },
+  { title: "Hijri Date Converter Islamic Calendar", url: "https://isrartoolzone.blogspot.com/p/hijri-date-converter-islamic-calendar.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgOPG8PQG3AzegUFx3pXasamoA9VjYU8zzbR5EDyy4q8weLw81DjDNExPgRoZr0_X31_hySEOeY5SJ8JaoLScRpWOH3AG8PIh4kyXVFe1vEtWlV-3KQ9AgT-CKGYNYBbHoTURyVrcScARBcvepgM7kUjiEqpfoJbzTCIUhK1V1lVMYoDsH8t0w8CtES11mK/s1024/3D_digital_artwork_of_a_m_552705508.png.jpg", views: 9400, active: 4100 },
+  { title: "Age Calculator Birthday DOB Calculator", url: "https://isrartoolzone.blogspot.com/p/age-calculator-birthday-dob-calculator.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjW1VOO-cASN3dHSxJMH5qY7MY8ksmKkCaQt3CIx6wJlkpQf7Zx4KZiKxfXMi-NPabnqYRm4pzZWbAJVQuAzZC174lWzozRohqfsDoI0bxZTiVzxZkPQAIyct3bl4HvkPnl-CuCZmOb3F47Cc3Y7ALiDlmXPqgxiqZEzMkCCEqR3-i_W5fdvTZtT-7U-kib/s1024/3D_digital_illustration_o_465396204.png.jpg", views: 13200, active: 5700 },
+  { title: "Bijli Calculator Electricity Bill India", url: "https://isrartoolzone.blogspot.com/p/bijli-calculator-electricity-bill-india.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj-2-PXvurQ-2_9Dr_tRorNmREZu9UwXuLLIctkvkkM93bb2goClY1c9FRDyw0ZkZG5n0yoL69PZp_fUSGZRSKMp2xi_tYKpyn6kTio2pryembFC5Hy5mf5r40NYEb0qqBcYacNvowlth3GkrLRX24TKozxazgh7oc_6ihagtfg6uEl-yXqHcwi_2PxAGGG/s1024/_3D_digital_artwork_of_an_100067981.png", views: 10500, active: 4600 },
+  { title: "Loan Calculator EMI Calculator Free", url: "https://isrartoolzone.blogspot.com/p/loan-calculator-emi-calculator-free.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh5MY4xXWUJ73IJ62w1j7kGfdUOBF4rgL_1NPwPaqsfZhMLeUxg-4I5n9gMXv4MSm9wELsn61AOlJ6xlLq4D3kfNJjxpWSFPZoJD2KEjm_pq-qBf5fY3KtHCR0ALXVM6XmOcDt8hvziWriu_CBWi2cFJ1knp7TjHisQJ7ETJ8t_jwkZrvqE_qwxM5a0IAd2/s1024/_3D_digital_illustration__674769610.png", views: 15600, active: 6700 },
+  { title: "All Unit Converter Convert Online", url: "https://isrartoolzone.blogspot.com/p/all-unit-converter-convert-online-israr.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg52gYZmDj7UU5PQ6RdRDbFG5St2lqjGVE7Wu5yE5E2pxS91pjbFJvSavCs62Hmrf9csec6wg8RaT6r0m2Mos6svq_Z9PKz0RbBqO4YNSYmTZp-CdHFDbXlWf1gaxZt5ttSB3K4tNib-uHDNa4HVB57JeLRpA1mH80lxAJUq7PFY9gOQyFaMUiRTXJdTIA/s1376/85478.jpg", views: 12900, active: 5500 },
+  { title: "Free Quiz Maker Create Online Quiz", url: "https://isrartoolzone.blogspot.com/p/free-quiz-maker-create-online-quiz.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiKg0LGvsyynNtTwoDk4WhvUH5zD7MzfmVzUWi-mPswiayxTXZbXSEpbzPIv5XeJ_hjnI7WZE9XYAQ0XBLFMGIEu0z6Ysw-Ha8G8ld86AJ9OgGkkq_svW6Qx_2lE4AASoyogw0AxFPyfqySE85R8V8i5ZWHzA3bvjAlJj1guD2nwGv-fj7gyIz3pxSFLVuh/s1024/A_realistic_workspace_set_759290890.png.jpg", views: 11800, active: 5100 },
+  { title: "Internet Speed Test Real Speed Check", url: "https://isrartoolzone.blogspot.com/p/internet-speed-test-real-speed-check.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg-OFuPGheUx_fMx6VSaVtIxfdzMZiY8gKlhpjEv1NHSf88vAIYYrTWIcQvAbj6OfwEU-hpZtgRkjnq3wTby3O6mlEUU5gMkv0PHL5_rDjJy9jxUjNDLAMQk2Lh-MGlvPV2Qbs9T3m9yxKPtKmB9J8Ac1EV6zYWeHF_7_amQ0adtlsbHxeAwY6cRHZO2HI/s1376/85471.jpg", views: 28400, active: 11900 },
+  { title: "WhatsApp Direct Message No Save Needed", url: "https://isrartoolzone.blogspot.com/p/whatsapp-direct-message-no-save-needed.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEist7Zgf7M-Bf12FVVWXsS9H1_B76ibECoTWLC6QMkr3nRhcLTYoB4EE5ac6YprFLyN_dlwvobV7aJMPOc4S6_cF8L34-sVnKO7pnTrNnLaN3vC27XbDRxjnnjq3xTUBrSqci9VZN-kEwi4k_fMN_NarPhOyxVlvOkiLel_6fYXl4aiBXl1MtoguFT-BZS/s1024/A_realistic,_modern_works_572379611.png.jpg", views: 21300, active: 9100 },
+  { title: "Strong Password Generator Free Secure", url: "https://isrartoolzone.blogspot.com/p/strong-password-generator-free-secure.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhnrreen0pq16tb4bc62futy9x1UC1HRbYQ9PThhOKF_gDnv4G5EQ8n31NOyN5lqh6IPGMpsY5MPQ12YqKQ6nWDo3yaeKKcflTCE7aDr8IM-1yzUr2L61QXaYfMqR6Qaokn5LQOmbkmVv8BhWAmxsSa4yJ51uPvkE65qhRvq-HPFEcu6w7SL52z-uf5Xxu6/s1024/A_high-resolution_modern__733840994.png.jpg", views: 14700, active: 6300 },
+  { title: "IFSC Code Finder All Banks Instantly", url: "https://isrartoolzone.blogspot.com/p/ifsc-code-finder-all-banks-instantly.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjI-jBSdrAB6Tn2sIrOMTBGnHVw4OlETxJI1FXROgKiFL5nkYXV0GMBE2aWDYsP0MYvFjCGL4B0PHcdE-AwWoqoLMKsYYIYadWqEMj9tHxy47InwCwJTfl_-JCXvgsHoAueZAARdDcaWH2tNllYpjElASodvY8DV1EBumsPzLw7hW4XwyqE5Ocgmi1ft4sL/s1024/A_modern,_ultra-realistic_296282460.png.jpg", views: 16900, active: 7300 },
+  { title: "Stylish Button Generator Free Custom", url: "https://isrartoolzone.blogspot.com/p/stylish-button-generator-free-custom.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh11vKg8nolORYkMgLrtiOMu3Fj_AQ7SdGV8BmM-6_9fkUvKdxXvNGxReKTomWiP08yO8Q0cD2NgAWeffWMMVOsgkYUGXwcejSO4slFNVi06Av2uHne6HtNUZrLHO9s4M9snG-HRKbp22cUcMZZPseEkYJvLO56U6mkW7XrG0kXdqegap3MCLI_svAeiVvD/s1024/A-beautiful-stylish-dark-263720649.jpg", views: 13800, active: 5900 },
+  { title: "CSS Button Generator Free Stylish Maker", url: "https://isrartoolzone.blogspot.com/p/css-button-generator-free-stylish-maker.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh8CungducxWsZhba3tDXkQZyAKfCQV7dXOGdUfA_mWykzmiFgy_fEN6feQzD2VouWQH_fVApMy2NPo5gM6HdYi6RahNOjfvEW94FLG80b2pR1YH8wfq2ZvjEi0zF7rzNiBJTXDCavZVNCK4REMlVVvV6vUWtF8G4Wi0ZgTJXE0ITKuNx02k6Nx5BuRvuj5/s1024/A_modern_tech-themed_thum_975821435.png.jpg", views: 15200, active: 6500 },
+  { title: "Random Button Generator Modern CSS Tool", url: "https://isrartoolzone.blogspot.com/p/random-button-generator-modern-css-tool.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhyq7HRTOiKpEoKAuuL6XlUu0Xsk-9awGQ1fk1_WEEdMEVQMXzwKg3u-p3HeVVUFwY2P70HQvVJISFSvrsvSNPVyHKUWV6PcYGLOI36KRpVQ3qDCbOdJVqfxyE_mxzyLNq3K4zUWv5Spi_ogQbhRgxlROBRzx3dQx2xYekmLQLFwSbOoxJMVDZGs-dtuvxJ/s1024/A_modern_computer_monitor_897506577.png", views: 11900, active: 5200 },
+  { title: "200 CSS Buttons Stylish Modern Button", url: "https://isrartoolzone.blogspot.com/p/200-css-buttons-stylish-modern-button.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhvhAdwBK_beWICNDWnlLRn3UKLKCxyUrtFYCqNFiGSLVl-qKdF4fQu8CXrtqFATj3ubF3KzMbV0odE3hSf6UiHDpBBluMPxGbcbXS2rQgjThiVlUIAZEDKn7eQr4pGg1pP36YDpndsQVMeurHOyfuoeL39mf_h2jeHxIwvoj6VEP7GWfjUuRHvZiD-e6o9/s1024/A_modern_workspace_setup__996476333.png.jpg", views: 19400, active: 8300 },
+  { title: "Gradient Generator Custom Color", url: "https://isrartoolzone.blogspot.com/p/gradient-generator-custom-color.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgrjyUU01S3FcQiXxWxwwANeGMoKs7O20_zmQdhqBExrF-6PZSSIT-IKwtY-aKOKAHfQtrlcloYAC5HVwfFvWy8iUGHHEhyznXAjopj4-rcc1MnYS2RCzsE3emkwGf-Owt4smzdEhrXoiC6PvZMomLdmd1npvL19NxdZdQNgbf8m4_-cgevi2y7vSBx6xS4/s1024/A_modern_digital_workspac_520016822.png.jpg", views: 12600, active: 5400 },
+  { title: "Text Shadow Create Advanced Stylish", url: "https://isrartoolzone.blogspot.com/p/text-shadow-create-advanced-stylish.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiHd-Qs1RpkMlFreti2wD_MBcwqhLYBiXdy-EqWxsT_Dvrs5uFQxrpSowmju05CTJqMBvOtRkQEhcW0PTuXCF-74QJUHW39c_dcroVN8bwFL9PiH-ECjNGBg7KBKaI5iXd3zDq-A68MhdPQiQvQUVW3Qj3Y4kuE82KM6ebMs095oNdsi68zQlz0g7UpVdHN/s1024/A_realistic_and_modern_wo_871813681.png.jpg", views: 10800, active: 4700 },
+  { title: "Text Shadow Generator Stylish", url: "https://isrartoolzone.blogspot.com/p/text-shadow-generator-stylish.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh17Lei4xnMgHRsZ2gBTdaCMKKmZx1H4ypDFgvmd_3oByPHUue9DsUxdml6CeZhFzrHsTEzBL_R5cUQ86ivEs-1_T2jSRZTfVMnOEhcThvohe7PJ1HXFHr_69S6rytgFdpnJf16VtPwFnBh-wLKrByTRIBf0iH3eLjb8-8wIPEkdfDXmfDJdFlku_etOPv0/s1024/A_beautiful_girl_sitting__723633607.png", views: 11500, active: 5000 },
+  { title: "Soft Shadow Generator Modern", url: "https://isrartoolzone.blogspot.com/p/soft-shadow-generator-modern.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiZUaLsINHNhYW0uvbSVcX94eirlvp_q_F9L5J8WGRO5ESDHMpXSGEGeqOT3qshuU6INPmphyFlhtbIQnt0a-TPAtp6qZhXQUuT_mMTAsN76JMq1vpuL7et0iUME4NMxnWTfehEszV-tcg_qTh-o6yzUYghzqz563DAOnARtOF_vvSggr_Yd0_X_6IeUEKS/s1024/A_modern_creative_workspa_425799789.png.jpg", views: 9900, active: 4300 },
+  { title: "Box Shadow Generator Stylish CSS", url: "https://isrartoolzone.blogspot.com/p/box-shadow-generator-stylish-css.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgBkzPxtcQX3P0epcAxv-Un__phzRnzqBKz_2Usg8LT0rMBVqZMAAuxd61YGt3IqGExFCUwIV02PDO1TYP869H8jhP_3pf_oefJJeV2e26p2Mr7Rb_A_XqaAzG0LiYSxpVoiS2Euigsj8oB3B8s_cicuK2D85e-VEnz7EoXa4jx2aPMIBQkMvDRtLCK6-E/s1024/A-realistic-19-year-old-g-299570621.jpg", views: 16400, active: 7100 },
+  { title: "Border Style Generator Stylish CSS", url: "https://isrartoolzone.blogspot.com/p/border-style-generator-stylish-css.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgaIN1lwHJjma3tutHxqGpnkJ4kb1-_sKvyNPQ-YVhszDo_flMVsmX4tmqbenC-WG__0pZnLX95lwP96-sfcSu9WG26ByfdTTzExwlb7pORYpwzStRHonzV9pyfyi0SQphFr3jSreCrALmZn5k4b3yUSWonox789tqH5eA4YTKSarZtgzQgctxCZMscAFV4/s1024/A_vibrant,_slightly_isome_901030846.png.jpg", views: 10400, active: 4500 },
+  { title: "Dashed Border Generator Stylish CSS", url: "https://isrartoolzone.blogspot.com/p/dashed-border-generator-stylish-css.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgFhB1kH61tVuzAInFLnNkf800mxcakNkZLRt04eiBelE2sdxZ5c_XDsFqrFQkoQ_4E2MSYkNp39xv6UTLX1plZ4YxMtTQaKBCr4LmWvJwNFAqjoMFIWIRR0PPzWAZlg1UyxmT4t2yYPkG5kb43C96jpHFNB6Sxg3rlFEUbq5l4tu5PtpzYEg5o1ZhIVqA/s1024/86626.jpg", views: 9200, active: 4000 },
+  { title: "CSS Transform Generator Visual Scale", url: "https://isrartoolzone.blogspot.com/p/css-transform-generator-visual-scale.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgETlCYH96-APYh7nGtaKm4uAVS7-AfmF_hdtZSD76MFVHlVNUp1v7kjirplPrI3m6ZBEo3fjKSN6BqAr21HU3ea_urgoHX0aTLQ6DiIXUo2J3AIDWX6-tE3EWdTKQdu7VJp9miatQtSn8Bz2QCY7cJ_OLCTmCQxsym2HzHnCtgNs2e1T6mTFDNGHbgAnSA/s1024/A_realistic_19-year-old_g_927578681.png.jpg", views: 11100, active: 4800 },
+  { title: "YouTube Revenue Calculator Estimate", url: "https://isrartoolzone.blogspot.com/p/youtube-revenue-calculator-estimate.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjWDpLiWbQ9mDD-VOBl9t5Hw7RTEuMaqonxUbnwvO7Un7qpCGbulZiDL12xjS9xj9kDPGdhCpljLpnmme_XAdhvnFqyU68y5qxFklSPARUDxNi9DFMkLjob9fJfteGD_6CBvdTgEpcFjjiwbIhN5iEz8R3WYh6ZtOC2wg5dzEC-JjPg-0Q0walSJh6Z10EA/s1024/3D_digital_artwork_of_a_c_390156647.png.jpg", views: 23500, active: 10100 },
+  { title: "YouTube Thumbnail Downloader Download", url: "https://isrartoolzone.blogspot.com/p/youtube-thumbnail-downloader-download.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjWDpLiWbQ9mDD-VOBl9t5Hw7RTEuMaqonxUbnwvO7Un7qpCGbulZiDL12xjS9xj9kDPGdhCpljLpnmme_XAdhvnFqyU68y5qxFklSPARUDxNi9DFMkLjob9fJfteGD_6CBvdTgEpcFjjiwbIhN5iEz8R3WYh6ZtOC2wg5dzEC-JjPg-0Q0walSJh6Z10EA/s1024/3D_digital_artwork_of_a_c_390156647.png.jpg", views: 26800, active: 11400 },
+  { title: "YouTube Tags Extractor Get Tags Title", url: "https://isrartoolzone.blogspot.com/p/youtube-tags-extractor-get-tags-title.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiRsmmlV4xs3inRcfr-y3xhK7jhALSUr2Aoy81ZdAxN2e5rVyiwMsfDazUeR3qAhQWebM2Vkn0Yed-9mHZi6dIZaoKX8HYE91GLoSiPLg6RjIV_dNI1h1O4PcfSPgDXhgIrfz1pCoLXoHNrjxlle9U0wxNi09x8vm2Cszj3NilMRViKq14DSm8jAyX6yyZm/s1024/Design-a-vibrant-eye-cat-409136621.jpg", views: 17900, active: 7700 },
+  { title: "YouTube Tag Extractor Extract Tags", url: "https://isrartoolzone.blogspot.com/p/youtube-tag-extractor-extract-tags-from.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhOMnwXGDQeRdfMUMnaFX6DswALeA8TXEWeIb0xlPQo7kMn2Cx7ncmVABzXbo3YqRIohdCjVRQ7vboBmYNdDoMkIgHnBBMu-PJOAThCZMddLIRIbc2Zrw6BbSRWo2R8wOKUUw_QJ10nacZ68eag3XaBKWq2X4MTanMM0tF3nMEZGzKyWNXp5DKWu1OpP9ZP/s1024/A_premium,_realistic_work_586583276.png.jpg", views: 15800, active: 6800 },
+  { title: "Israr Tool Zone YouTube Suite Pro", url: "https://isrartoolzone.blogspot.com/p/israr-tool-zone-youtube-suite-pro-all.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhoJN9KJnchdLBuTkswSnUKRLHiHxHgnF0u2NdAkWFXTjFKlgEcmDjSmTXTrmNN69VdW8A_TQ_qOm5Z3JU9IDmNfgYay8KYWskJLTJozFHPtEeVXPGeFruDcSGKAFoxUSh142CQhR_DViH9jNKijHi8k9Oo-F7l6jP1aAN39sfMewZj1V1lXl40PLAc1rjM/s1024/a-modern-and-vibrant-digital-workspace-showing-multiple-tools-like-youtube-description-generator-im-1.jpg", views: 29500, active: 12800 },
+  { title: "Image Crop Tool Online Circle Crop", url: "https://isrartoolzone.blogspot.com/p/image-crop-tool-online-circle-crop.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhN-a2DyOWA_E-Vquj62RIUuO-mCgJwV3k08rJl0BYT67gTBrR6sb0wY3q0q-jRZAyOjyc1TZu2gCbBFjZ2jkxme6BDLkx3Y7IGZa4B5t4zPzYNMNw5RFhfgFkIuesqbiK6nCTjCZ9ihXh5_Ri5OeKhYJd_k_yUVwBn-JQDXLdsL3plePwFPdofwDSPmN15/s1024/A_modern_digital_workspac_634396879.png.jpg", views: 14100, active: 6100 },
+  { title: "Compress Image Online Reduce Photo Size", url: "https://isrartoolzone.blogspot.com/p/compress-image-online-reduce-photo-size.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjXvu7BgPz-r-c3DURYsr4g-xocl0QmfW30MBuYNHIi-fCFvyAtY27fYi61M27E_bYYn8z-0iHNylJ7yr4TMvi0A2ld_v5REjC0cz-94fUL_jcV6BWUZH-we1qtRKYhyphenhyphenuUvF4pXWO3XCGs_8F-Qq9p1eKqu4MDHpZYqgYvtbKzY355rmKQMPFmIJB_eJD_U/s1024/3D_digital_art_showing_a__466267296.png.jpg", views: 21900, active: 9300 },
+  { title: "Free Keyword Generator Tool", url: "https://isrartoolzone.blogspot.com/p/free-keyword-generator-tool-100-working.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg6YuNE99KFDev80Kpc4JWAZVrcu2oYQ7SqcPnV9wYtwuGXvrPovXzZsWw206dpHxgJTSts5HOZVezmrs-4JA0l6sDE1gaXT11fWUOly1IPrItpFfqAw8mcRKLVo-f_AqNLuZ5ZnpzA6XxCPbt_44M4uWtE3U1jovqS7hUgUk91gMwRoonTLKyJsQXUjymv/s1024/A_realistic_workspace_fea_109311379.png.jpg", views: 13300, active: 5800 },
+  { title: "Free Keyword Finder Tool Unlimited SEO", url: "https://isrartoolzone.blogspot.com/p/free-keyword-finder-tool-unlimited-seo.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiOcESecPB0A0xfXMaj0A85OWQ8Qfe0yCsJKHyWXbuoK2FwRqmk9i3YpTMxyjwhZKwbKezCroQbugz5bslKkno9G_gRcEhA0Bw99phPXvB3x_xmojAOB9g2ATcG40wI0H_kaSfYD7uWJx19MTsVNxEOhso-ueE81k_o1tK28CG8b8dHBe3LiEut2IZ3iO0O/s1024/3D_digital_illustration_o_786134816.png.jpg", views: 12500, active: 5400 },
+  { title: "Free HTML Code Converter Parse HTML", url: "https://isrartoolzone.blogspot.com/p/free-html-code-converter-parse-html.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj4rqg-09AHicyxZEC0KwWvMG9rZzCFw4tJx1XB7cTQre59sjHs7Z7Mps7m_8UYVWNe2GSQzV2kjV0OE136cl9OWQLiyNOn5-YvOR-xTymiQoX1Xyrs-WECTvKU6xMyyIbGVIKg35IbKdSa0i1TUohEzF6igfopjCruX27KPfzH3NG3v1vKnpHd8i1TV1jb/s1024/A_realistic_digital_works_328734446.png.jpg", views: 10600, active: 4600 },
+  { title: "Free AdSense Calculator Calculate", url: "https://isrartoolzone.blogspot.com/p/free-adsense-calculator-calculate.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiNxHjhaA2KJhepbFfTPOCaQizuc_uWXmzhB4Ncp_e2POJLc1HJZEBmcJjla0Da8PxadmKuVVfwFCZ42ezM0qotLZZjK6JIaFaHJTVbXDQsXO5FHsPtzE78jrPJIacWukn8SR1e4Fc-_QJNHCQu1xvdGtRRFpZoJcR1VCqjR8WzbRgpO30_iFWGhESkkYrC/s1024/3D_digital_artwork_of_a_m_639514542.png.jpg", views: 18100, active: 7800 },
+  { title: "Free AdSense Approval Checker", url: "https://isrartoolzone.blogspot.com/p/free-adsense-approval-checker-check.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEihKsYErSqjZwWP5cCsPlCxVHTDsJeeUCkyEk_u8Be0TgFptUhYKPH6ZLjCGfsPfMXo2F3CSAavfKba4oQcYI1kOm941lPy0W9alZkqhkkuyvT2mpYhnRFNPymxHjUlT7r6rP3ix2Dh7FxWiMFPmThTNLSq7K5Pgt8mXXZJohaD3S5PlcWmAEgeKolb040V/s1024/A_large_ultra-HD_monitor__107871603.png.jpg", views: 14900, active: 6400 },
+  { title: "Free Favicon Generator Create Favicon", url: "https://isrartoolzone.blogspot.com/p/free-favicon-generator-create-favicon.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjr2r0Lk7DcCgMnA-KUrUNGZBDsA4N-EYzcQ3myBfvdPcEn-5287TqCB684Zf6OjESvqPvZIvEKVNLN3tkntJkuSqOVUyuv4G60-6ZATG1ZnPbUXnYRNzl6O7t8J7k_PXd_u7a1XnIbB-MAWbdMD8T8asEM2ef7M6ndOpmendQIqINN_JXG6AN3Xs1e8AFp/s1704/A_modern_3D_office_room_with_g_454643402.png.jpg", views: 11200, active: 4900 },
+  { title: "Free Robots.txt Generator Custom", url: "https://isrartoolzone.blogspot.com/p/free-robotstxt-generator-custom.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjbbzTgRwcSbVuTrpr0E8fLZPMhHuAicc_Jn5Dw_t0mKVxpE8-UgSOh5tqfg7OBR8YkqcJsmqMinw4znYe2xbocHTqIIqRzs_0u1eMJXaYE2gJ_m-a90l9kA4k9maZOrqi0KhxkH2E-UXw13R3_1NR_3_dv4r7-yHV7TZOmSIZeAECF2j90LywqbyiuMI57/s1024/3D_digital_artwork_of_an__996230162.png.jpg", views: 10100, active: 4400 },
+  { title: "Free Meta Description Generator SEO", url: "https://isrartoolzone.blogspot.com/p/free-meta-description-generator-seo.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgaEauCnZqQDvOWXsBTlfz1BloPQlaVhgae59TJmXZHTlZoex9B22CsrsDkYgd7PhyphenhyphenYfl6oq9FjW1CKpU48KjqNZ_GJ_ZsQTcLBa448aG4CRI0oOmVSY3XxtAkmVGgBu9h0RMKPYYn91zwtSqGjxXNI051H7umVye2eLvMmswDk3N0hm8mhy9xuHNvJfHPy/s1024/3D_digital_artwork_of_a_s_474133995.png.jpg", views: 13600, active: 5900 },
+  { title: "Free About Us Page Generator", url: "https://isrartoolzone.blogspot.com/p/free-about-us-page-generator-for.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiNkQ10P0xR8h2j4y_o2zNiatsIgliVdfA9eIOa_N2z4rEVLhbT9FT3_2grilRRQnx-LlJTF-jaUr5NNAsjM5amhVskbFZfIDI6Szb7dxEBlPmK6iZVs_zZ416cvSxmsDTLuqYnR5MVO-UZr3cKrn7AJFjZANpm3HV47i0HObaHj2G6hvKbXjPTpG68MvHg/s1024/_3D_digital_illustration__965042156.png.jpg", views: 15700, active: 6800 },
+  { title: "Free Contact Form Generator", url: "https://isrartoolzone.blogspot.com/p/free-contact-form-generator-for-blogger.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiamUHVbY39aoOxSE-Lh5J3_KdUObEoDO3t3mT3jt_qWkbAsDhPWl532g1wm76ABAR8SELTD9KJtD27ykZYMpwzLYFnAR2YcedMrUOcy-KHB65WOImI3Ypq4TDNikUA1CUspK1cU4_tSM1LRGMQdU4JI7f8mvZ3CbCmsjz98rJ0PcbOLbbg0z8rjqBZe5qL/s1704/A_modern_office_interior_scene_349539268.png.jpg", views: 11800, active: 5100 },
+  { title: "Free Cookie Banner Generator GDPR", url: "https://isrartoolzone.blogspot.com/p/free-cookie-banner-generator-gdpr.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg2M16n1tMqpt_dutRY4TU6MgTUF4WLcRZ61vQCgPh853VBRFd0dEbVBjXUKDOnYCNWxa_0RZ96EfH8rA4aR663ZVUsn-XtYCre2pr0UiCPMnmkeVUv7m6X5ejs4Yyaoc-q_Gy59vKwfS4TQfhC2BUzFaxg2YYUzrglAIAMFBJvzsiQc60JhkKPH6w7c1YT/s1704/A_modern_office_interior_scene_3988369.png.jpg", views: 9600, active: 4200 },
+  { title: "Cookies Policy Generator Free GDPR", url: "https://isrartoolzone.blogspot.com/p/cookies-policy-generator-free-gdpr.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgW8V7KY31VWMGhYm8Cwkvar5iFGKOVn2qHZWds7jbh91rMAlrHBfFOBV1OmvQ55MpKKnh1yrweEVbwHF5Q9Jz06vJ0Rgp9KwLzTtIJ4irqEzpn1i-Do9Qo1tZxs7L6L8wLnsKVZ_b6LWe6HdFcDRctB2hTQbpLkruSuRyWtaEbM-nAq__RKsekmW8nnMi3/s1704/A_modern_office_interior_scene_870095492.png.jpg", views: 8900, active: 3900 },
+  { title: "Free Disclaimer Generator", url: "https://isrartoolzone.blogspot.com/p/free-disclaimer-generator-for-website.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEibtOeDV8CmSr_gET5g1z1cJymjILzET_m2j69LA7ZVofN7wN0e6GifvRLaZe_wJeEzJ8QM3iohjN1YHqGmdUWBXV8I76nVF5EWRjsv-LbgYgazGt74oghff3CQoOf-TPsaffFjqMNfHjUpgauGhStRSFqXJawgB1p2GPcMaWVbLixGvWqwivpsMHk8eLqz/s1024/_3D_digital_illustration__910356462.png.jpg", views: 12400, active: 5300 },
+  { title: "Free Terms and Conditions Generator", url: "https://isrartoolzone.blogspot.com/p/free-terms-and-conditions-generator-for.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgOe7R0H26pDgxcnlcg0xcnGoTXW_u7RuGmle0ik22wu38O1_7AaTflKvpXa2cUT1_bB_FJiVNTB4oVNDjzg4XdeMA8g0ClU85l43jc21YycX269sohezTeGtX2FvcBvFAcIKxzst8ZwwRIfBlvtOWhD2_KGbgA_5SKae_Kitgwt2vyjxXJfJjRs6Ei7yTs/s1024/3D_digital_illustration_o_84667914.png.jpg", views: 13100, active: 5600 },
+  { title: "Free Privacy Policy Generator", url: "https://isrartoolzone.blogspot.com/p/free-privacy-policy-generator-for.html", thumb: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi_TQGmxZYxWHwqp-eE1Q0kHOmysMvZYEXTKQcwMaM3GmiO7sU_UVVItRp-0xWGzppVWdv6-lySiqOp5wq5T-3WjWll-dHj3FR_nX65hspPCJNKvrHv-f76_u97Th5u7m_iIwSAay8bKKOzAiFbWkLvYP426fZ2-snGvv58YW-9cyo3LopZ83bY8N678dE/s1024/_3D_digital_illustration__223292339.png.jpg", views: 16800, active: 7200 }
+];
+
+let relatedMode = 'recent';
+let relatedCurrentPage = 1;
+const relatedBatchSize = 4;
+let relatedSearchResults = allRelatedTools.slice();
+
+// Activity selection state
+let activityMarkMode = false;   // true when Mark mode is active (individual ticks selectable)
+let activitySelectedIds = new Set();
+
+// REAL-TIME STATS LOGIC FOR CARDS
+const liveStatsJitter = {};
+allRelatedTools.forEach(t => {
+  liveStatsJitter[t.url] = {
+    newUsersOffset: 0,
+    activeUsersOffset: 0,
+    todayViewsIncrement: 0,
+    dropCycle: 0
+  };
+});
+
+setInterval(() => {
+  allRelatedTools.forEach(t => {
+    const j = liveStatsJitter[t.url];
+    j.dropCycle++;
+    if (j.dropCycle % 6 === 0) {
+      j.newUsersOffset -= (Math.floor(Math.random() * 3) + 3);
+    } else {
+      j.newUsersOffset += (Math.floor(Math.random() * 4) + 1);
+    }
+  });
+  document.querySelectorAll('.related-card').forEach(card => {
+    const tool = allRelatedTools.find(x => x.url === card.href);
+    const el = card.querySelector('.live-new-user-val');
+    if (tool && el) {
+      const val = Math.max(100, (Number(tool.views) || 0) + liveStatsJitter[tool.url].newUsersOffset);
+      el.textContent = val.toLocaleString();
+    }
+  });
+}, 1400);
+
+setInterval(() => {
+  allRelatedTools.forEach(t => {
+    liveStatsJitter[t.url].activeUsersOffset += (Math.floor(Math.random() * 5) - 2);
+  });
+  document.querySelectorAll('.related-card').forEach(card => {
+    const tool = allRelatedTools.find(x => x.url === card.href);
+    const el = card.querySelector('.live-active-user-val');
+    if (tool && el) {
+      const val = Math.max(50, (Number(tool.active) || 0) + liveStatsJitter[tool.url].activeUsersOffset);
+      el.textContent = val.toLocaleString();
+    }
+  });
+}, 3200);
+
+setInterval(() => {
+  allRelatedTools.forEach(t => {
+    liveStatsJitter[t.url].todayViewsIncrement += (Math.floor(Math.random() * 2) + 1);
+  });
+  document.querySelectorAll('.related-card').forEach(card => {
+    const tool = allRelatedTools.find(x => x.url === card.href);
+    const el = card.querySelector('.live-today-views-val');
+    if (tool && el) {
+      const base = Number(el.getAttribute('data-base') || 25000);
+      el.textContent = (base + liveStatsJitter[tool.url].todayViewsIncrement).toLocaleString();
+    }
+  });
+}, 5200);
+
+function getRelatedViews() {
+  try { return JSON.parse(localStorage.getItem('israr_lab_related_views') || '{}'); } catch(e) { return {}; }
+}
+
+function trackRelatedVisit(tool) {
+  try {
+    const views = getRelatedViews();
+    views[tool.url] = (Number(views[tool.url]) || 0) + 1;
+    localStorage.setItem('israr_lab_related_views', JSON.stringify(views));
+    window.addUserActivity(tool.title, tool.url, 'Tool Visit');
+  } catch(e) {}
+}
+
+function saveRelatedSearchHistory(query) {
+  if (!query || !query.trim()) return;
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem('israr_keyword_search_history') || '[]'); } catch(e) { history = []; }
+  history = history.filter(item => String(item).toLowerCase() !== query.toLowerCase());
+  history.unshift(query);
+  if (history.length > 100) history = history.slice(0, 100);
+  try { localStorage.setItem('israr_keyword_search_history', JSON.stringify(history)); } catch(e) {}
+}
+
+function showSearchSuggestions() {
+  const box = document.getElementById('searchSuggestionsBox');
+  if (!box) return;
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem('israr_keyword_search_history') || '[]'); } catch(e) { history = []; }
+  box.innerHTML = '';
+  if (!history.length) {
+    box.innerHTML = '<div class="search-suggestion-item">No recent searches yet</div>';
+  } else {
+    history.slice(0, 10).forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'search-suggestion-item';
+      div.textContent = item;
+      div.onmousedown = (e) => {
+        e.preventDefault();
+        const input = document.getElementById('relatedSearchInput');
+        if (input) input.value = item;
+        box.style.display = 'none';
+        filterRelatedTools(true);
+      };
+      box.appendChild(div);
+    });
+  }
+  box.style.display = 'block';
+}
+
+function highlightRelatedTitle(title, query) {
+  const original = String(title || '');
+  const terms = String(query || '').trim().split(/\s+/).filter(Boolean);
+  if (!terms.length) return escapeHtml(original);
+  try {
+    const escapedTerms = [...new Set(terms)].sort((a,b) => b.length - a.length).map(term => term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const matcher = new RegExp('(' + escapedTerms.join('|') + ')', 'ig');
+    return escapeHtml(original).replace(matcher, '<mark>$1</mark>');
+  } catch (e) {
+    return escapeHtml(original);
+  }
+}
+
+function getSortedRelatedTools(list) {
+  if (relatedMode === 'recent') return list.slice();
+  if (relatedMode === 'top') {
+    return list.slice().sort((a, b) => (Number(b.views) || 0) - (Number(a.views) || 0));
+  }
+  if (relatedMode === 'ranking') {
+    const visitCounts = getRelatedViews();
+    return list.slice().sort((a, b) => {
+      const visitsA = Number(visitCounts[a.url]) || 0;
+      const visitsB = Number(visitCounts[b.url]) || 0;
+      if (visitsB !== visitsA) return visitsB - visitsA;
+      return (Number(b.views) || 0) - (Number(a.views) || 0);
+    });
+  }
+  return list.slice();
+}
+
+function getTodayViewsForTool(t, rankIndex, totalCount) {
+  if (relatedMode === 'top' && totalCount > 1) {
+    const maxV = 280000, minV = 22000;
+    const step = (maxV - minV) / (totalCount - 1);
+    return Math.round(maxV - rankIndex * step);
+  }
+  const base = Number(t.views) || 10000;
+  return Math.max(22000, Math.round(base * 1.15));
+}
+
+function renderRelatedGrid(tools, query) {
+  const grid = document.getElementById('relatedToolsGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  if (!tools.length) {
+    grid.innerHTML = '<div style="color:var(--text2);font-size:11.5px;grid-column:1/-1;text-align:center;padding:16px;">No matching tools found.</div>';
+    return;
+  }
+  const fullSorted = getSortedRelatedTools(relatedSearchResults);
+  const pageStart = (relatedCurrentPage - 1) * relatedBatchSize;
+
+  tools.forEach((t, idx) => {
+    const globalRank = pageStart + idx;
+    const card = document.createElement('a');
+    const queryTerms = String(query || '').toLowerCase().split(/\s+/).filter(Boolean);
+    const titleText = String(t.title || '').toLowerCase();
+    card.className = 'related-card' + (queryTerms.length && queryTerms.every(term => titleText.includes(term)) ? ' search-match' : '');
+    card.href = t.url;
+    card.target = '_blank';
+    card.rel = 'noopener noreferrer';
+    card.addEventListener('click', () => trackRelatedVisit(t));
+
+    const todayViews = getTodayViewsForTool(t, globalRank, fullSorted.length);
+    const stats = liveStatsJitter[t.url] || { newUsersOffset: 0, activeUsersOffset: 0, todayViewsIncrement: 0 };
+    const curNew = Math.max(100, (Number(t.views) || 0) + stats.newUsersOffset);
+    const curActive = Math.max(50, (Number(t.active) || 0) + stats.activeUsersOffset);
+    const curToday = todayViews + stats.todayViewsIncrement;
+
+    card.innerHTML = `
+      <img src="${t.thumb}" alt="${escapeHtml(t.title)}" class="related-card-image" loading="lazy">
+      <div class="related-card-title">${highlightRelatedTitle(t.title, query)}</div>
+      <div class="related-card-stats">
+        <div><span class="live-dot-orange"></span>New user: <b class="live-new-user-val">${curNew.toLocaleString()}</b></div>
+        <div><span class="live-dot-green"></span>Active user: <b class="live-active-user-val">${curActive.toLocaleString()}</b></div>
+        <div><span class="live-dot-blue"></span>Today views: <b class="live-today-views-val" data-base="${todayViews}">${curToday.toLocaleString()}</b></div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function renderRelatedPagination(totalPages) {
+  const box = document.getElementById('israr-lab-related-pagination');
+  if (!box) return;
+  box.innerHTML = '';
+  if (relatedMode === 'activity' || totalPages <= 1) return;
+
+  const prevBtn = document.createElement('button');
+  prevBtn.className = 'israr-lab-related-page-btn';
+  prevBtn.textContent = 'Prev';
+  prevBtn.disabled = relatedCurrentPage <= 1;
+  prevBtn.onclick = () => {
+    if (relatedCurrentPage > 1) {
+      relatedCurrentPage--;
+      filterRelatedTools(false);
+      document.getElementById('israr-lab-related-section')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  box.appendChild(prevBtn);
+
+  for (let i = 1; i <= totalPages; i++) {
+    const b = document.createElement('button');
+    b.className = 'israr-lab-related-page-btn' + (i === relatedCurrentPage ? ' active' : '');
+    b.textContent = i;
+    b.onclick = () => {
+      relatedCurrentPage = i;
+      filterRelatedTools(false);
+      document.getElementById('israr-lab-related-section')?.scrollIntoView({ behavior: 'smooth' });
+    };
+    box.appendChild(b);
+  }
+
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'israr-lab-related-page-btn';
+  nextBtn.textContent = 'Next';
+  nextBtn.disabled = relatedCurrentPage >= totalPages;
+  nextBtn.onclick = () => {
+    if (relatedCurrentPage < totalPages) {
+      relatedCurrentPage++;
+      filterRelatedTools(false);
+      document.getElementById('israr-lab-related-section')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  box.appendChild(nextBtn);
+}
+
+/* ===== ACTIVITY FUNCTIONS ===== */
+function formatActivityDate(ts) {
+  try {
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return 'Unknown date';
+    return d.toLocaleString();
+  } catch(e) {
+    return 'Unknown date';
+  }
+}
+
+window.toggleActivityMark = function() {
+  const acts = window.getRelatedActivity();
+  if (!acts.length) return;
+
+  if (!activityMarkMode) {
+    // Enable Mark mode WITHOUT selecting all items automatically
+    activityMarkMode = true;
+    activitySelectedIds.clear();
+  } else {
+    // Already in Mark mode: if none selected, cancel Mark mode; otherwise delete only ticked ones
+    if (activitySelectedIds.size === 0) {
+      activityMarkMode = false;
+      filterRelatedTools(false);
+      return;
+    }
+    try {
+      let list = window.getRelatedActivity();
+      list = list.filter(a => !activitySelectedIds.has(String(a.id)));
+      localStorage.setItem('israr_lab_related_activity', JSON.stringify(list));
+    } catch(e) {}
+    activityMarkMode = false;
+    activitySelectedIds.clear();
+  }
+  filterRelatedTools(false);
+};
+
+window.deleteAllActivities = function() {
+  if (!confirm('Delete ALL activity records?')) return;
+  try {
+    localStorage.setItem('israr_lab_related_activity', '[]');
+    activityMarkMode = false;
+    activitySelectedIds.clear();
+    filterRelatedTools(false);
+  } catch(e) {}
+};
+
+window.handleActivityRowClick = function(e, id, url) {
+  if (activityMarkMode) {
+    window.toggleSingleActivity(e, id);
+    return;
+  }
+  window.open(url, '_blank');
+};
+
+window.toggleSingleActivity = function(e, id) {
+  e.stopPropagation();
+  e.preventDefault();
+  if (!activityMarkMode) {
+    activityMarkMode = true;
+  }
+
+  const sid = String(id);
+  if (activitySelectedIds.has(sid)) {
+    activitySelectedIds.delete(sid);
+  } else {
+    activitySelectedIds.add(sid);
+  }
+  filterRelatedTools(false);
+};
+
+window.filterRelatedTools = function(resetPage) {
+  if (resetPage) relatedCurrentPage = 1;
+  const input = document.getElementById('relatedSearchInput');
+  const rawQuery = (input ? input.value : '').trim();
+  const terms = rawQuery.toLowerCase().split(/\s+/).filter(Boolean);
+
+  relatedSearchResults = allRelatedTools.filter(t => {
+    const title = String(t.title || '').toLowerCase();
+    return terms.every(term => title.includes(term));
+  });
+
+  const status = document.getElementById('relatedSearchStatus');
+  const count = document.getElementById('relatedSearchCount');
+  if (status) {
+    if (rawQuery) {
+      status.style.display = 'block';
+      status.innerHTML = 'Searched: <strong>' + escapeHtml(rawQuery) + '</strong> &nbsp;|&nbsp; Matching cards: <strong>' + relatedSearchResults.length + '</strong>';
+      saveRelatedSearchHistory(rawQuery);
+    } else {
+      status.style.display = 'none';
+    }
+  }
+
+  if (relatedMode === 'activity') {
+    const grid = document.getElementById('relatedToolsGrid');
+    grid.classList.add('activity-mode');
+    const acts = window.getRelatedActivity();
+    if (count) count.textContent = 'Activity history: ' + acts.length + ' records';
+
+    if (!acts.length) {
+      grid.innerHTML = `
+        <div class="activity-toolbar">
+          <button class="btn-back" onclick="setRelatedMode('recent')">← Back</button>
+          <button class="btn-mark" disabled style="opacity:0.4">Mark</button>
+          <button class="btn-all-delete" disabled style="opacity:0.4">All Delete</button>
+        </div>
+        <div style="color:var(--text2);font-size:12px;padding:30px 10px;text-align:center;">No activity recorded yet.</div>
+      `;
+    } else {
+      const selectedCount = activitySelectedIds.size;
+      let markBtnClass = 'btn-mark';
+      let markBtnText = 'Mark';
+      if (activityMarkMode) {
+        if (selectedCount > 0) {
+          markBtnClass = 'btn-mark confirm-mode';
+          markBtnText = 'Delete (' + selectedCount + ')';
+        } else {
+          markBtnClass = 'btn-mark active-mark';
+          markBtnText = 'Cancel Mark';
+        }
+      }
+
+      let html = `
+        <div class="activity-toolbar">
+          <button class="btn-back" onclick="setRelatedMode('recent')">← Back</button>
+          <button class="${markBtnClass}" onclick="toggleActivityMark()">
+            ${markBtnText}
+          </button>
+          <button class="btn-all-delete" onclick="deleteAllActivities()">All Delete</button>
+        </div>
+        <div class="israr-lab-activity-list">
+      `;
+
+      acts.forEach(a => {
+        const safeActUrl = /^https?:\/\//i.test(a.url) ? a.url : (getHostedPageUrl() || 'https://isrartoolzone.blogspot.com/');
+        const isSelected = activitySelectedIds.has(String(a.id));
+        const dateStr = formatActivityDate(a.timestamp);
+        const titleStr = a.title || 'Untitled';
+
+        html += `
+          <div class="israr-lab-activity-row ${isSelected ? 'selected' : ''}" 
+               onclick="handleActivityRowClick(event, ${a.id}, '${escapeHtml(safeActUrl)}')">
+            <div class="act-tick ${activityMarkMode ? 'mark-ready' : ''}" onclick="toggleSingleActivity(event, ${a.id})">
+              ${isSelected ? '✓' : ''}
+            </div>
+            <div class="act-content">
+              <div class="act-time">${escapeHtml(dateStr)}</div>
+              <div class="act-title">${escapeHtml(titleStr)}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      grid.innerHTML = html;
+    }
+    document.getElementById('israr-lab-related-pagination').innerHTML = '';
+    return;
+  }
+
+  // Reset activity state when leaving activity mode
+  activityMarkMode = false;
+  activitySelectedIds.clear();
+  const gridEl = document.getElementById('relatedToolsGrid');
+  if (gridEl) gridEl.classList.remove('activity-mode');
+
+  const sorted = getSortedRelatedTools(relatedSearchResults);
+  const totalPages = Math.max(1, Math.ceil(sorted.length / relatedBatchSize));
+  relatedCurrentPage = Math.min(Math.max(1, relatedCurrentPage), totalPages);
+  const visible = sorted.slice((relatedCurrentPage - 1) * relatedBatchSize, relatedCurrentPage * relatedBatchSize);
+
+  renderRelatedGrid(visible, rawQuery);
+  renderRelatedPagination(totalPages);
+
+  if (count) {
+    count.textContent = rawQuery
+      ? (relatedSearchResults.length + ' matching cards found')
+      : ('Showing ' + visible.length + ' of ' + sorted.length + ' tools');
+  }
+};
+
+window.setRelatedMode = function(mode) {
+  relatedMode = mode || 'recent';
+  relatedCurrentPage = 1;
+  document.querySelectorAll('.israr-lab-related-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+  const searchWrap = document.querySelector('.related-search-wrap');
+  if (searchWrap) searchWrap.style.display = (mode === 'activity') ? 'none' : 'block';
+  filterRelatedTools(true);
+};
+
+const relatedInput = document.getElementById('relatedSearchInput');
+if (relatedInput) {
+  relatedInput.addEventListener('input', () => filterRelatedTools(true));
+  relatedInput.addEventListener('focus', showSearchSuggestions);
+  relatedInput.addEventListener('click', showSearchSuggestions);
+}
+
+document.addEventListener('click', (e) => {
+  const box = document.getElementById('searchSuggestionsBox');
+  const input = document.getElementById('relatedSearchInput');
+  if (box && input && !box.contains(e.target) && e.target !== input) {
+    box.style.display = 'none';
+  }
+});
+
+// Initial render
+filterRelatedTools(true);
+</script>
+</body>
+</html>
