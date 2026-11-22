@@ -1,8 +1,5 @@
-
-/* ===== Original inline script at source offset 1474 ===== */
-
-  //<![CDATA[
-  (function() {
+/* === JS Block 1: script-0 === */
+(function() {
     var url = window.location.href;
     if (url.indexOf("?m=1") !== -1 || url.indexOf("&m=1") !== -1) {
       var cleanUrl = url.replace("?m=1", "").replace("&m=1", "").replace("?m=0", "").replace("&m=0", "");
@@ -10,13 +7,8 @@
       window.history.replaceState(null, null, cleanUrl);
     }
   })();
-  //]]>
 
-
-
-/* ===== Original inline script at source offset 138504 ===== */
-
-
+/* === JS Block 2: script-1 === */
 /* ========== PERSISTENT STORAGE (IndexedDB + localStorage) ========== */
 const ISRAR_DB_NAME = 'IsrarLabMultiHtmlViewerDB';
 const ISRAR_DB_STORE = 'appdata';
@@ -4204,10 +4196,7 @@ function renderRelatedPagination(){}
 function renderRelatedActivity(){}
 window.setRelatedMode = setRelatedMode;
 
-
-
-/* ===== Original inline script at source offset 313879 ===== */
-
+/* === JS Block 3: script-2 === */
 (function(){
   /* Fast editor: never highlight on every keystroke. Colors paint after idle. */
   var paintQueued = false;
@@ -4349,10 +4338,7 @@ window.setRelatedMode = setRelatedMode;
   window.addEventListener('load',bind);
 })();
 
-
-
-/* ===== Original inline script at source offset 326381 ===== */
-
+/* === JS Block 4: final-full-paste-and-scroll-sync === */
 (function(){
  function bindEditorFix(){
   const ta=document.getElementById('htmlCodeInput');
@@ -4379,10 +4365,7 @@ window.setRelatedMode = setRelatedMode;
  window.addEventListener('load',bindEditorFix);
 })();
 
-
-
-/* ===== Original inline script at source offset 334938 ===== */
-
+/* === JS Block 5: israrlab-search-highlight-persistence-fix === */
 (function(){
   function getNodes(root){
     const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(n){return n.nodeValue&&n.nodeValue.length?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;}});
@@ -4466,10 +4449,7 @@ window.setRelatedMode = setRelatedMode;
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindPaste);else bindPaste();window.addEventListener('load',bindPaste);
 })();
 
-
-
-/* ===== Original inline script at source offset 343725 ===== */
-
+/* === JS Block 6: final-editor-actions-fix === */
 (function(){
   const ta=()=>document.getElementById('htmlCodeInput');
   let historyStack=[],historyIndex=-1,lastValue=null,restoring=false;
@@ -4497,10 +4477,7 @@ window.setRelatedMode = setRelatedMode;
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();window.addEventListener('load',init);
 })();
 
-
-
-/* ===== Original inline script at source offset 358619 ===== */
-
+/* === JS Block 7: final-cursor-and-scroll-alignment-fix === */
 (function(){
  function align(){
   const ta=document.getElementById('htmlCodeInput');
@@ -4524,10 +4501,7 @@ window.setRelatedMode = setRelatedMode;
  window.addEventListener('load',align);
 })();
 
-
-
-/* ===== Original inline script at source offset 361986 ===== */
-
+/* === JS Block 8: requested-save-return-home-fix === */
 function saveAndReturnHome(){
   var ok = false;
   try { ok = executeAutoSave(); } catch (e) { console.error(e); }
@@ -4566,10 +4540,7 @@ function saveAndReturnHome(){
   goHome();
 }
 
-
-
-/* ===== Original inline script at source offset 368006 ===== */
-
+/* === JS Block 9: final-darkmode-home-reapply-fix === */
 (function(){
   /* Re-apply dark/light every time home is shown + on load */
   function reapply(){
@@ -4606,10 +4577,7 @@ function saveAndReturnHome(){
   }, 100);
 })();
 
-
-
-/* ===== Original inline script at source offset 369317 ===== */
-
+/* === JS Block 10: final-layout-sort-sync-fix === */
 (function(){
   function syncLayoutStatus(){
     try{
@@ -4627,10 +4595,7 @@ function saveAndReturnHome(){
   window.addEventListener('load', syncLayoutStatus);
 })();
 
-
-
-/* ===== Original inline script at source offset 373400 ===== */
-
+/* === JS Block 11: ultimate-persist-and-pagination-fix === */
 (function(){
   function persistNow(){
     try { if (typeof saveData === 'function') saveData(); } catch(e) {}
@@ -4650,10 +4615,7 @@ function saveAndReturnHome(){
   });
 })();
 
-
-
-/* ===== Original inline script at source offset 398057 ===== */
-
+/* === JS Block 12: line-scroll-raf-bind === */
 (function(){
   function bind(){
     var ta = document.getElementById('htmlCodeInput');
@@ -4674,10 +4636,7 @@ function saveAndReturnHome(){
   window.addEventListener('load', bind);
 })();
 
-
-
-/* ===== Original inline script at source offset 401299 ===== */
-
+/* === JS Block 13: editor-hscroll-sync === */
 (function(){
   function bind(){
     var ta = document.getElementById('htmlCodeInput');
@@ -4698,10 +4657,7 @@ function saveAndReturnHome(){
   window.addEventListener('load', bind);
 })();
 
-
-
-/* ===== Original inline script at source offset 404374 ===== */
-
+/* === JS Block 14: codemirror-editor-bootstrap === */
 (function(){
   var cmInstance = null;
   var cmReady = false;
@@ -4945,10 +4901,7 @@ function saveAndReturnHome(){
   window.addEventListener('load', function(){ patchEditorIO(); window.refreshEditorLayout(); });
 })();
 
-
-
-/* ===== Original inline script at source offset 429234 ===== */
-
+/* === JS Block 15: israrlab-repaired-multiple-html === */
 (function(){
   var STORE='israrlab_multiple_html_windows_repaired_v1';
   function cards(){return Array.prototype.slice.call(document.querySelectorAll('#windowCodeWorkspace .window-code-card'));}
@@ -5005,10 +4958,7 @@ function saveAndReturnHome(){
 
 })();
 
-
-
-/* ===== Original inline script at source offset 436986 ===== */
-
+/* === JS Block 16: israrlab-learning-library === */
 (function(){
   var practice=[], courses=[], activeDetail=null;
   var practiceBases=[
@@ -5174,10 +5124,7 @@ function saveAndReturnHome(){
   document.addEventListener('DOMContentLoaded',function(){renderLearningList('practice');renderLearningList('courses');});
 })();
 
-
-
-/* ===== Original inline script at source offset 461931 ===== */
-
+/* === JS Block 17: israrlab-preview-horizontal-fix === */
 (function(){
   function fixPreviewLayout(){
     var pane=document.getElementById('windowPreviewPane');
@@ -5195,10 +5142,7 @@ function saveAndReturnHome(){
   });
 })();
 
-
-
-/* ===== Original inline script at source offset 462809 ===== */
-
+/* === JS Block 18: israrlab-window-preview-selector === */
 (function(){
   var currentPreviewIndex=0;
   function getCards(){
@@ -5263,10 +5207,7 @@ function saveAndReturnHome(){
   });
 })();
 
-
-
-/* ===== Original inline script at source offset 466346 ===== */
-
+/* === JS Block 19: israrlab-url-code-course-controller === */
 (function(){
 'use strict';
 function el(id){return document.getElementById(id)}
@@ -5414,10 +5355,7 @@ window.copyFetchedUrlCode=function(){
 window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el('urlCodeStatus');if(!out||!out.value){if(status){status.className='url-code-status error';status.textContent='Pehle code Fetch karein.'}return}try{await navigator.clipboard.writeText(out.value);status.className='url-code-status success';status.textContent='Pura source code copy ho gaya.'}catch(e){out.focus();out.select();try{document.execCommand('copy');status.className='url-code-status success';status.textContent='Source code copy ho gaya.'}catch(x){status.className='url-code-status error';status.textContent='Copy nahi hua. Code select karke copy karein.'}}};
 })();
 
-
-
-/* ===== Original inline script at source offset 483821 ===== */
-
+/* === JS Block 20: israrlab-multi-html-hard-fix === */
 (function(){
   function cards(){return Array.prototype.slice.call(document.querySelectorAll('#windowCodeWorkspace .window-code-card'));}
   function read(card){
@@ -5581,10 +5519,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 
 })();
 
-
-
-/* ===== Original inline script at source offset 496448 ===== */
-
+/* === JS Block 21: israrlab-course-full-js === */
 (function(){
   function el(id){return document.getElementById(id);}
   window.openCourseFullView=function(tab){
@@ -5644,10 +5579,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
   };
 })();
 
-
-
-/* ===== Original inline script at source offset 501096 ===== */
-
+/* === JS Block 22: israrlab-divide-editor-boot === */
 (function(){
   var divideEditor=null;
   function initDivideEditor(){
@@ -5705,10 +5637,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
   };
 })();
 
-
-
-/* ===== Original inline script at source offset 505758 ===== */
-
+/* === JS Block 23: israrlab-gen-preview-js === */
 (function(){
   /* moved */
 
@@ -5749,10 +5678,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
   };
 })();
 
-
-
-/* ===== Original inline script at source offset 511488 ===== */
-
+/* === JS Block 24: israrlab-divide3-url-multi-js === */
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); else console.log(m);}catch(e){} }
@@ -5913,10 +5839,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
   };
 })();
 
-
-
-/* ===== Original inline script at source offset 521330 ===== */
-
+/* === JS Block 25: israrlab-full-cut-url-js === */
 (function(){
   function el(id){return document.getElementById(id);}
   function toast(m){try{if(typeof showToast==='function')showToast(m);}catch(e){}}
@@ -5972,10 +5895,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
   };
 })();
 
-
-
-/* ===== Original inline script at source offset 524456 ===== */
-
+/* === JS Block 26: israrlab-url-reset-save-cut-js === */
 (function(){
   function el(id){return document.getElementById(id);}
   function toast(m){try{if(typeof showToast==='function')showToast(m);}catch(e){console.log(m);}}
@@ -6116,10 +6036,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
   };
 })();
 
-
-
-/* ===== Original inline script at source offset 531812 ===== */
-
+/* === JS Block 27: israrlab-preview-cat-fix-js === */
 (function(){
   function el(id){return document.getElementById(id);}
   function toast(m){try{if(typeof showToast==='function')showToast(m);}catch(e){}}
@@ -6240,10 +6157,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
   };
 })();
 
-
-
-/* ===== Original inline script at source offset 563224 ===== */
-
+/* === JS Block 28: israrlab-final-fixes-js === */
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){} }
@@ -7492,10 +7406,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 
 })();
 
-
-
-/* ===== Original inline script at source offset 619669 ===== */
-
+/* === JS Block 29: israrlab-preview-buttons-fix === */
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){ try{ alert(m); }catch(e2){} } }
@@ -7710,10 +7621,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
   };
 })();
 
-
-
-/* ===== Original inline script at source offset 628943 ===== */
-
+/* === JS Block 30: israrlab-category-final-fix === */
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){} }
@@ -7908,10 +7816,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
   }
 })();
 
-
-
-/* ===== Original inline script at source offset 638819 ===== */
-
+/* === JS Block 31: israrlab-cdf-preview-final-fix === */
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){
@@ -8158,10 +8063,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
   };
 })();
 
-
-
-/* ===== Original inline script at source offset 647788 ===== */
-
+/* === JS Block 32: israrlab-url-html-source-fix === */
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){} }
@@ -8378,10 +8280,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
   }
 })();
 
-
-
-/* ===== Original inline script at source offset 655212 ===== */
-
+/* === JS Block 33: israrlab-cdf-preview-generate-final-v5 === */
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){} }
@@ -8877,10 +8776,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
   }, 200);
 })();
 
-
-
-/* ===== Original inline script at source offset 681536 ===== */
-
+/* === JS Block 34: israrlab-multiple-html-host-v4 === */
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){} }
@@ -9334,10 +9230,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
   setTimeout(bind, 80);
 })();
 
-
-
-/* ===== Original inline script at source offset 702279 ===== */
-
+/* === JS Block 35: israrlab-cdf-source-codemirror-v1 === */
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){} }
@@ -9533,10 +9426,7 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
   }
 })();
 
-
-
-/* ===== Original inline script at source offset 722571 ===== */
-
+/* === JS Block 36: israrlab-url-code-codemirror-v1 === */
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){} }
