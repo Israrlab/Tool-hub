@@ -1,8 +1,4 @@
-/* IsrarLab Multi HTML Viewer - All CSS */
-/* Place this file in the SAME FOLDER as the HTML + israrlab-app.js */
-
-
-/* ===== STYLE 1 ===== */
+/* === CSS Block 1: block-0 === */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -763,8 +759,7 @@ body.light-mode select, body.light-mode .search-input, body.light-mode .title-in
 .course-subtabs{display:flex;gap:8px;margin:2px 0 10px}.course-subtab{flex:1;min-width:0;min-height:40px;padding:7px 9px;border:1px solid var(--border);border-radius:10px;background:var(--card-bg);color:var(--text);font-size:12px;font-weight:700;white-space:nowrap}.course-subtab.active{background:linear-gradient(135deg,var(--cyan),#14b8d4);border-color:transparent;color:#04202a}.course-subpane{width:100%;min-width:0}
 @media(max-width:420px){.divide-mode-tabs{gap:5px!important}.divide-mode-tab{font-size:10px!important;padding:8px 4px!important;min-width:0!important}.url-code-fetch-row button{min-width:72px;font-size:11px}.url-code-output{height:52vh}}
 
-
-/* ===== STYLE 2 id=editor-topbar-screenshot-style ===== */
+/* === CSS Block 2: editor-topbar-screenshot-style === */
 /* Compact mobile editor header matching the supplied reference screenshot. */
 #editorView .editor-top-bar{padding:12px 14px 10px!important;background:var(--header-bg)!important;border-bottom:1px solid var(--border)!important;display:flex!important;flex-direction:column!important;gap:7px!important;flex-shrink:0!important}
 #editorView .editor-top-row1{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto auto!important;align-items:center!important;gap:7px!important;flex-wrap:nowrap!important;width:100%!important}
@@ -776,8 +771,7 @@ body.light-mode select, body.light-mode .search-input, body.light-mode .title-in
 #editorView #liveDateTime{font-size:12px!important;font-weight:600!important;color:var(--muted)!important;white-space:nowrap!important}
 @media(max-width:390px){#editorView .editor-top-bar{padding:10px 10px 9px!important}#editorView .editor-top-row1{grid-template-columns:auto minmax(0,1fr) auto auto!important;gap:5px!important}#editorView .editor-top-row1 .top-btn{padding:0 9px!important;font-size:11px!important}#editorView #statsInfo{font-size:10px!important;padding:11px 5px!important}#editorView #saveIndicatorText{font-size:11px!important}#editorView #editorSaveUpdateBtn{min-width:65px!important;padding:0 10px!important;font-size:12px!important}}
 
-
-/* ===== STYLE 3 id=editor-top-buttons-not-hidden-fix ===== */
+/* === CSS Block 3: editor-top-buttons-not-hidden-fix === */
 /* Keep the editor view above the site's fixed header so its top controls never sit underneath it. */
 #editorView{z-index:1000001!important;position:fixed!important;top:0!important;left:0!important;right:0!important;width:100vw!important;height:100dvh!important;max-height:100dvh!important;overflow:hidden!important;padding-top:env(safe-area-inset-top,0px)!important;box-sizing:border-box!important;}
 #editorView .editor-top-bar{position:relative!important;top:auto!important;left:auto!important;right:auto!important;z-index:1000002!important;visibility:visible!important;opacity:1!important;flex-shrink:0!important;margin-top:0!important;}
@@ -786,8 +780,7 @@ body.light-mode select, body.light-mode .search-input, body.light-mode .title-in
 /* Ensure editor content scrolls below the toolbar rather than over it. */
 #editorView .editor-body{position:relative!important;z-index:1!important;min-height:0!important;flex:1 1 auto!important;overflow:hidden!important;}
 
-
-/* ===== STYLE 4 id=editor-top-row-visible-final-fix ===== */
+/* === CSS Block 4: editor-top-row-visible-final-fix === */
 /* The website's sticky main header was covering the first editor toolbar row on mobile.
    Put the live date first and the action buttons immediately beneath it, in normal flow. */
 #editorView .editor-top-bar{display:flex!important;flex-direction:column!important;gap:8px!important;padding:10px 12px!important;overflow:visible!important;height:auto!important;min-height:0!important;}
@@ -801,8 +794,7 @@ body.light-mode select, body.light-mode .search-input, body.light-mode .title-in
 #editorView .editor-body{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;}
 @media(max-width:380px){#editorView .editor-top-bar{padding-left:8px!important;padding-right:8px!important}#editorView .editor-top-row1{grid-template-columns:auto minmax(0,1fr) auto auto!important;gap:4px!important}#editorView .editor-top-row1 .top-btn{padding:0 7px!important;font-size:11px!important}#editorView #statsInfo{font-size:9px!important;padding:7px 3px!important}#editorView #saveIndicatorText{font-size:10px!important}}
 
-
-/* ===== STYLE 5 id=final-header-clearance-and-paste-fix ===== */
+/* === CSS Block 5: final-header-clearance-and-paste-fix === */
 /* Place editor controls below the site's fixed header so they are never covered. */
 #editorView{top:96px!important;height:calc(100dvh - 96px)!important;max-height:calc(100dvh - 96px)!important;padding-top:0!important;box-sizing:border-box!important;}
 #editorView .editor-top-bar{position:relative!important;z-index:100!important;flex-shrink:0!important;margin:0!important;}
@@ -812,8 +804,7 @@ body.light-mode select, body.light-mode .search-input, body.light-mode .title-in
 #editorView #htmlCodeInput{overflow-y:auto!important;overflow-x:hidden!important;white-space:pre!important;overflow-wrap:anywhere!important;word-break:break-word!important;}
 @media(max-width:420px){#editorView{top:96px!important;height:calc(100dvh - 96px)!important;max-height:calc(100dvh - 96px)!important;}}
 
-
-/* ===== STYLE 6 id=editor-one-line-toolbar-fixed-size ===== */
+/* === CSS Block 6: editor-one-line-toolbar-fixed-size === */
 #editorView{z-index:1000001!important;position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-height:100dvh!important;overflow:hidden!important;box-sizing:border-box!important;}
 #editorView .editor-top-bar{padding:8px 10px!important;gap:0!important;flex:0 0 auto!important;position:relative!important;z-index:10!important;}
 #editorView .editor-top-row1{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto auto!important;align-items:center!important;gap:6px!important;flex-wrap:nowrap!important;width:100%!important;}
@@ -830,8 +821,7 @@ body.light-mode select, body.light-mode .search-input, body.light-mode .title-in
 #editorView #htmlCodeInput{height:100%!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;}
 @media(max-width:390px){#editorView .editor-top-bar{padding:7px 7px!important}#editorView .editor-top-row1{gap:4px!important;grid-template-columns:auto minmax(0,1fr) auto auto!important}#editorView .editor-top-row1 .editor-back-btn,#editorView .editor-top-row1 .editor-preview-btn,#editorView #editorSaveUpdateBtn{padding:0 6px!important;font-size:10px!important;height:38px!important}#editorView #statsInfo{font-size:9px!important;padding:7px 2px!important}}
 
-
-/* ===== STYLE 7 id=israrlab-professional-ui-fixes ===== */
+/* === CSS Block 7: israrlab-professional-ui-fixes === */
 /* Requested layout: four equal buttons on row one, five equal buttons on row two, larger cards. */
 .header-btn-row{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;width:100%!important;}
 .header-btn-row .hdr-btn{width:100%!important;min-width:0!important;white-space:nowrap!important;}
@@ -864,8 +854,7 @@ body.light-mode select, body.light-mode .search-input, body.light-mode .title-in
 @media(max-width:420px){.header-btn-row .hdr-btn{font-size:9px!important;gap:3px!important;padding:0 2px!important}.top-action-bar{gap:4px!important;padding:8px 6px!important}.top-action-bar .top-btn{font-size:8px!important;gap:3px!important;padding:0 1px!important;}#notesContainer .note-card{height:310px!important;}#notesContainer .card-cover-box{height:125px!important;}}
 @media(max-width:360px){#editorView .editor-top-row1{grid-template-columns:55px minmax(0,1fr) 57px 60px!important;gap:3px!important;}#editorView .editor-top-row1 .editor-back-btn,#editorView .editor-top-row1 .editor-preview-btn,#editorView #editorSaveUpdateBtn{font-size:9px!important;padding:0 3px!important;}#editorView #statsInfo{font-size:8px!important;}}
 
-
-/* ===== STYLE 8 id=final-editor-usability-fix ===== */
+/* === CSS Block 8: final-editor-usability-fix === */
 /* Keep editor dimensions stable and keep the visible syntax layer aligned with the real textarea. */
 #editorView .editor-top-row1{grid-template-columns:minmax(48px,.72fr) minmax(0,1.9fr) minmax(48px,.72fr) minmax(56px,.82fr)!important;gap:4px!important}
 #editorView .editor-top-row1 .editor-back-btn,#editorView .editor-top-row1 #editorSaveUpdateBtn,#editorView .editor-top-row1 .editor-preview-btn{min-width:0!important;width:100%!important;height:34px!important;padding:0 3px!important;font-size:10px!important;gap:3px!important;box-sizing:border-box!important}
@@ -881,8 +870,7 @@ body.light-mode select, body.light-mode .search-input, body.light-mode .title-in
 #editorView .quick-toolbar .quick-row:nth-child(2) .quick-select{flex:1 1 0!important;min-width:0!important;height:34px!important;font-size:10px!important}
 @media(max-width:390px){#editorView .editor-top-row1{grid-template-columns:minmax(45px,.72fr) minmax(0,1.9fr) minmax(45px,.72fr) minmax(52px,.82fr)!important;gap:3px!important}#editorView .editor-top-row1 .editor-back-btn,#editorView .editor-top-row1 #editorSaveUpdateBtn,#editorView .editor-top-row1 .editor-preview-btn{font-size:9px!important;height:32px!important;padding:0 2px!important}#editorView #statsInfo{font-size:8px!important;letter-spacing:-.4px!important}#editorView .quick-toolbar .quick-row .quick-btn{font-size:10px!important;height:32px!important;min-height:32px!important}}
 
-
-/* ===== STYLE 9 id=user-request-editor-fixes ===== */
+/* === CSS Block 9: user-request-editor-fixes === */
 /* Editor top row: compact action buttons, more room for character/word counts */
 #editorView .editor-top-row1{display:grid!important;grid-template-columns:minmax(0,.85fr) minmax(0,1.55fr) minmax(0,.85fr) minmax(0,.85fr)!important;gap:6px!important;align-items:stretch!important;width:100%!important;flex-wrap:nowrap!important}
 #editorView .editor-top-row1 .editor-back-btn,#editorView .editor-top-row1 #editorSaveUpdateBtn,#editorView .editor-top-row1 .editor-preview-btn{width:100%!important;min-width:0!important;height:40px!important;padding:0 3px!important;display:flex!important;align-items:center!important;justify-content:center!important;white-space:nowrap!important;font-size:11px!important;box-sizing:border-box!important}
@@ -905,8 +893,7 @@ body.light-mode select, body.light-mode .search-input, body.light-mode .title-in
   .card-footer button{height:26px!important;min-height:26px!important;font-size:8px!important}
 }
 
-
-/* ===== STYLE 10 id=user-request-card-spacing-fix ===== */
+/* === CSS Block 10: user-request-card-spacing-fix === */
 /* Remove the large blank area inside home cards and keep card actions compact. */
 #notesContainer .note-card{
   height:auto!important;
@@ -941,8 +928,7 @@ body.light-mode select, body.light-mode .search-input, body.light-mode .title-in
   #editorView #statsInfo{font-size:8px!important;letter-spacing:-.35px!important;padding:3px 0!important;}
 }
 
-
-/* ===== STYLE 11 id=final-user-preview-theme-cursor-fixes ===== */
+/* === CSS Block 11: final-user-preview-theme-cursor-fixes === */
 /* Home-card preview: show the actual site at readable scale instead of shrinking it to half size. */
 #notesContainer .note-card{height:310px!important;min-height:310px!important;justify-content:flex-start!important;}
 #notesContainer .card-cover-box{height:118px!important;min-height:118px!important;flex:0 0 118px!important;overflow:hidden!important;background:#fff!important;}
@@ -998,8 +984,7 @@ body.light-mode #editorView .code-highlight-layer .hljs-comment{color:#6e7781!im
 body.light-mode #editorView .code-highlight-layer .hljs-title,
 body.light-mode #editorView .code-highlight-layer .hljs-function{color:#8250df!important;}
 
-
-/* ===== STYLE 12 id=requested-search-update-card-preview-fix ===== */
+/* === CSS Block 12: requested-search-update-card-preview-fix === */
 /* All search matches stay yellow; the currently selected match turns red. */
 #editorView mark.search-hit-mark{background:#ffeb3b!important;color:#111!important;border-radius:2px!important;box-shadow:0 0 0 1px #ffeb3b!important;}
 #editorView mark.search-hit-mark.search-hit-active{background:#ff3030!important;color:#fff!important;box-shadow:0 0 0 1px #ff3030!important;}
@@ -1018,8 +1003,7 @@ body.light-mode #editorView .code-highlight-layer .hljs-function{color:#8250df!i
  #notesContainer .card-footer button{height:26px!important;min-height:26px!important;font-size:8.5px!important;}
 }
 
-
-/* ===== STYLE 13 id=final-darkmode-card-preview-scroll-fix ===== */
+/* === CSS Block 13: final-darkmode-card-preview-scroll-fix === */
 /* ===== Dark / Light reliability ===== */
 body.light-mode{
   --bg:#ffffff !important;
@@ -1180,8 +1164,7 @@ body.light-mode{
   #notesContainer .card-footer button{height:28px !important;min-height:28px !important;font-size:9px !important;}
 }
 
-
-/* ===== STYLE 14 id=new-card-cta-style ===== */
+/* === CSS Block 14: new-card-cta-style === */
 /* New Card CTA - same highlight style as New Category */
 .top-btn.new-card-main-btn{
   background:var(--cyan) !important;
@@ -1198,8 +1181,7 @@ body.light-mode .top-btn.new-card-main-btn{
   border-color:var(--cyan) !important;
 }
 
-
-/* ===== STYLE 15 id=ultimate-card-box-scroll-fix ===== */
+/* === CSS Block 15: ultimate-card-box-scroll-fix === */
 #homeView{
   display:flex !important;
   flex-direction:column !important;
@@ -1308,8 +1290,7 @@ body.light-mode .top-btn.new-card-main-btn{
   appearance:none;
 }
 
-
-/* ===== STYLE 16 id=recovery-same-as-home-cards-fix ===== */
+/* === CSS Block 16: recovery-same-as-home-cards-fix === */
 #recoveryView{
   display:none;
   flex-direction:column !important;
@@ -1403,8 +1384,7 @@ body.light-mode .top-btn.new-card-main-btn{
   }
 }
 
-
-/* ===== STYLE 17 id=hide-home-header-on-subviews ===== */
+/* === CSS Block 17: hide-home-header-on-subviews === */
 /* Fixed home title strip only on home; sub-views are true fullscreen */
 #editorView, #recoveryView, #backupView, #categorySettingsPageView, #secureLockView, #fullHtmlView, #infoView {
   top: 0 !important;
@@ -1432,8 +1412,7 @@ body.subview-active .israrlab-title-strip {
   pointer-events: none !important;
 }
 
-
-/* ===== STYLE 18 id=card-no-side-lines-solid ===== */
+/* === CSS Block 18: card-no-side-lines-solid === */
 #notesContainer .note-card,
 #recoveryContainer .note-card,
 .notes-container .note-card{
@@ -1472,8 +1451,7 @@ body.light-mode #recoveryContainer .note-card{
   border: none !important;
 }
 
-
-/* ===== STYLE 19 id=card-preview-fill-no-empty ===== */
+/* === CSS Block 19: card-preview-fill-no-empty === */
 /* Card HTML preview fills cover solidly (no black/white empty slabs) */
 #notesContainer .card-cover-box,
 #recoveryContainer .card-cover-box,
@@ -1504,8 +1482,7 @@ body.light-mode #recoveryContainer .note-card{
   display: block !important;
 }
 
-
-/* ===== STYLE 20 id=editor-scroll-lock-and-vault-cards ===== */
+/* === CSS Block 20: editor-scroll-lock-and-vault-cards === */
 body.subview-active, body.subview-active html {
   overflow: hidden !important;
   overscroll-behavior: none !important;
@@ -1619,8 +1596,7 @@ body.subview-active .israrlab-title-strip {
   z-index: 6 !important;
 }
 
-
-/* ===== STYLE 21 id=card-clip-and-interactive-preview ===== */
+/* === CSS Block 21: card-clip-and-interactive-preview === */
 /* Clip card so preview never sticks out (dark/light) */
 #notesContainer .note-card,
 #recoveryContainer .note-card,
@@ -1685,8 +1661,7 @@ body.subview-active .israrlab-title-strip {
   pointer-events: auto !important;
 }
 
-
-/* ===== STYLE 22 id=live-interactive-card-preview ===== */
+/* === CSS Block 22: live-interactive-card-preview === */
 /* Live interactive HTML inside card previews (home + recovery + vault) */
 #notesContainer .card-cover-box,
 #recoveryContainer .card-cover-box,
@@ -1721,8 +1696,7 @@ body.subview-active .israrlab-title-strip {
   background: var(--card-bg) !important;
 }
 
-
-/* ===== STYLE 23 id=force-interactive-previews-final ===== */
+/* === CSS Block 23: force-interactive-previews-final === */
 #notesContainer .html-preview-wrapper,
 #recoveryContainer .html-preview-wrapper,
 #secureLockContainer .html-preview-wrapper {
@@ -1737,8 +1711,7 @@ body.subview-active .israrlab-title-strip {
   display: none !important;
 }
 
-
-/* ===== STYLE 24 id=card-thin-theme-outline ===== */
+/* === CSS Block 24: card-thin-theme-outline === */
 /* Very thin theme-colored outline on cards */
 #notesContainer .note-card,
 #recoveryContainer .note-card,
@@ -1767,8 +1740,7 @@ body.light-mode #secureLockContainer .note-card {
   border-radius: 14px !important;
 }
 
-
-/* ===== STYLE 25 id=recovery-visible-cards ===== */
+/* === CSS Block 25: recovery-visible-cards === */
 #recoveryView {
   position: fixed !important;
   inset: 0 !important;
@@ -1810,8 +1782,7 @@ body.light-mode #secureLockContainer .note-card {
   padding: 40px 16px !important;
 }
 
-
-/* ===== STYLE 26 id=full-html-preview-header-fix ===== */
+/* === CSS Block 26: full-html-preview-header-fix === */
 /* Full HTML Preview header: single-line title + buttons that never overflow */
 #fullHtmlView .full-html-preview-header,
 #fullHtmlView .recovery-header.full-html-preview-header {
@@ -1886,8 +1857,7 @@ body.light-mode #secureLockContainer .note-card {
   }
 }
 
-
-/* ===== STYLE 27 id=mobile-code-box-no-overflow-full-color-fix ===== */
+/* === CSS Block 27: mobile-code-box-no-overflow-full-color-fix === */
 /* Code must stay INSIDE the editor box on mobile: no right-side spill */
 #editorView .code-editor-wrapper{
   overflow: hidden !important;
@@ -1979,8 +1949,7 @@ body.light-mode #editorView .code-highlight-layer .hljs-comment{color:#6e7781 !i
 body.light-mode #editorView .code-highlight-layer .hljs-number,
 body.light-mode #editorView .code-highlight-layer .hljs-literal{color:#0550ae !important;}
 
-
-/* ===== STYLE 28 id=line-gutter-scroll-sync-fix ===== */
+/* === CSS Block 28: line-gutter-scroll-sync-fix === */
 #editorView .line-numbers{
   overflow: hidden !important;
   height: 100% !important;
@@ -2004,8 +1973,7 @@ body.light-mode #editorView .code-highlight-layer .hljs-literal{color:#0550ae !i
   tab-size: 2 !important;
 }
 
-
-/* ===== STYLE 29 id=line-code-perfect-scroll-sync ===== */
+/* === CSS Block 29: line-code-perfect-scroll-sync === */
 /* 1 code line = 1 gutter line. No wrap mismatch. Horizontal scroll stays INSIDE editor. */
 #editorView .code-editor-wrapper{
   overflow: hidden !important;
@@ -2069,8 +2037,7 @@ body.light-mode #editorView .code-highlight-layer .hljs-literal{color:#0550ae !i
   max-width: none !important;
 }
 
-
-/* ===== STYLE 30 id=editor-no-right-spill-fix ===== */
+/* === CSS Block 30: editor-no-right-spill-fix === */
 /* Long lines stay INSIDE the editor card — swipe left/right inside code area only */
 #editorView .code-editor-wrapper{
   overflow: hidden !important;
@@ -2155,8 +2122,7 @@ body.light-mode #editorView .code-highlight-layer .hljs-literal{color:#0550ae !i
   box-sizing: border-box !important;
 }
 
-
-/* ===== STYLE 31 id=codemirror-editor-skin ===== */
+/* === CSS Block 31: codemirror-editor-skin === */
 /* CodeMirror fills editor like israrlabhtmlpreview — line wrap, no right spill */
 #editorView .code-editor-wrapper{
   display:flex !important;
@@ -2226,8 +2192,7 @@ body.light-mode #editorView .CodeMirror-gutters{
 body.light-mode #editorView .CodeMirror-linenumber{ color:#6e7781 !important; }
 body.light-mode #editorView .CodeMirror-cursor{ border-left-color:#0969da !important; }
 
-
-/* ===== STYLE 32 id=search-and-device-preview-css ===== */
+/* === CSS Block 32: search-and-device-preview-css === */
 /* CodeMirror search highlights */
 .cm-search-match,
 .CodeMirror .cm-search-match {
@@ -2590,8 +2555,7 @@ body.light-mode #fullHtmlView .pv-size-menu button {
  .learning-results{height:550px;max-height:550px;}
 }
 
-
-/* ===== STYLE 33 id=israrlab-final-layout-correction ===== */
+/* === CSS Block 33: israrlab-final-layout-correction === */
 /* Compact main navigation: Home, Category, HTML Divide, Setting */
 #mainSectionTabs{gap:5px!important;padding:6px 8px!important;}
 #mainSectionTabs .sec-tab{height:36px!important;min-height:36px!important;min-width:0!important;padding:0 7px!important;font-size:10px!important;gap:4px!important;border-radius:9px!important;white-space:nowrap!important;}
@@ -2717,8 +2681,7 @@ body:not(.light-mode) #divideModeDivide .CodeMirror .cm-comment{color:#8b949e!im
   color:var(--text);font-size:11px;font-weight:800;
 }
 
-
-/* ===== STYLE 34 id=israrlab-colored-code-boxes ===== */
+/* === CSS Block 34: israrlab-colored-code-boxes === */
 /* Code Divide result boxes — card style colored */
 #htmlDivideResults .html-divide-box{
   background:var(--card-bg)!important;
@@ -2807,8 +2770,7 @@ body:not(.light-mode) #divideModeDivide .CodeMirror .cm-comment{color:#8b949e!im
   box-shadow:0 8px 22px rgba(0,0,0,.12)!important;
 }
 
-
-/* ===== STYLE 35 id=israrlab-multiple-html-layout-fix ===== */
+/* === CSS Block 35: israrlab-multiple-html-layout-fix === */
 /* Multiple HTML fullscreen must fill viewport with working code area */
 #htmlDivideFullView.window-html-view,
 #htmlDivideFullView{
@@ -2890,8 +2852,7 @@ body:not(.light-mode) #divideModeDivide .CodeMirror .cm-comment{color:#8b949e!im
   min-height:0 !important;
 }
 
-
-/* ===== STYLE 36 id=israrlab-multi-fill-boost ===== */
+/* === CSS Block 36: israrlab-multi-fill-boost === */
 #htmlDivideFullView{display:none;flex-direction:column!important;height:100dvh!important;}
 /* removed brittle flex attribute selector that blocked Back */
 #htmlDivideFullView .window-code-workspace{
@@ -2920,8 +2881,7 @@ body:not(.light-mode) #divideModeDivide .CodeMirror .cm-comment{color:#8b949e!im
   flex:1 1 auto!important;min-height:0!important;width:100%!important;border:0!important;background:#fff!important;
 }
 
-
-/* ===== STYLE 37 id=israrlab-tab-overflow-fix ===== */
+/* === CSS Block 37: israrlab-tab-overflow-fix === */
 /* Prevent label overflow on divide mode tabs and header buttons */
 #panel-html-divide .divide-mode-tabs{
   display:grid !important;
@@ -3016,8 +2976,7 @@ body:not(.light-mode) #divideModeDivide .CodeMirror .cm-comment{color:#8b949e!im
 #fetchUrlCodeBtn.is-fetching .fetch-progress-ring{display:grid;}
 #fetchUrlCodeBtn.is-fetching{opacity:.92;}
 
-
-/* ===== STYLE 38 id=israrlab-fullview-open-state ===== */
+/* === CSS Block 38: israrlab-fullview-open-state === */
 #htmlDivideFullView{
   display:none !important;
   visibility:hidden !important;
@@ -3030,8 +2989,7 @@ body:not(.light-mode) #divideModeDivide .CodeMirror .cm-comment{color:#8b949e!im
   pointer-events:auto !important;
 }
 
-
-/* ===== STYLE 39 id=israrlab-page-heading-css ===== */
+/* === CSS Block 39: israrlab-page-heading-css === */
 .israrlab-page-heading{
   text-align:center !important;
   padding:10px 12px 14px;
@@ -3071,8 +3029,7 @@ body:not(.light-mode) #divideModeDivide .CodeMirror .cm-comment{color:#8b949e!im
 main.wrapper > section.panel{margin-top:4px;}
 body.subview-active .israrlab-page-heading{display:none !important;}
 
-
-/* ===== STYLE 40 id=israrlab-course-full-css ===== */
+/* === CSS Block 40: israrlab-course-full-css === */
 #courseFullView{
   display:none !important;
   flex-direction:column !important;
@@ -3140,8 +3097,7 @@ body.subview-active .israrlab-page-heading{display:none !important;}
   font-size:13px;
 }
 
-
-/* ===== STYLE 41 id=israrlab-fetch-btn-css ===== */
+/* === CSS Block 41: israrlab-fetch-btn-css === */
 #fetchUrlCodeBtn{
   position:relative !important;
   min-width:96px !important;
@@ -3168,8 +3124,7 @@ body.subview-active .israrlab-page-heading{display:none !important;}
 #fetchUrlCodeBtn .fetch-progress-ring{display:none !important;}
 @keyframes israrFetchSpin{to{transform:rotate(360deg);}}
 
-
-/* ===== STYLE 42 id=israrlab-divide-editor-polish ===== */
+/* === CSS Block 42: israrlab-divide-editor-polish === */
 #divideModeDivide .divide-editor-shell{
   min-height:280px !important;
   height:42vh !important;
@@ -3223,8 +3178,7 @@ body.light-mode #divideModeDivide .cm-comment{color:#6e7781 !important;}
   gap:8px !important;
 }
 
-
-/* ===== STYLE 43 id=israrlab-multi-thin-btns ===== */
+/* === CSS Block 43: israrlab-multi-thin-btns === */
 #htmlDivideFullView .hdf-header{
   display:grid !important;
   grid-template-columns:repeat(5,minmax(0,1fr)) !important;
@@ -3258,8 +3212,7 @@ body.light-mode #divideModeDivide .cm-comment{color:#6e7781 !important;}
   border-radius:9px !important;
 }
 
-
-/* ===== STYLE 44 id=israrlab-generate-preview-css ===== */
+/* === CSS Block 44: israrlab-generate-preview-css === */
 #htmlDivideGenerateBtn{
   position:relative !important;
   display:flex !important;
@@ -3300,8 +3253,7 @@ body.light-mode #divideModeDivide .cm-comment{color:#6e7781 !important;}
   gap:12px;
 }
 
-
-/* ===== STYLE 45 id=israrlab-multi-gap-fix ===== */
+/* === CSS Block 45: israrlab-multi-gap-fix === */
 /* Kill top gap on Multiple HTML full view */
 #htmlDivideFullView{
   padding:0 !important;
@@ -3337,8 +3289,7 @@ body.subview-active #htmlDivideFullView{
   top:0 !important;
 }
 
-
-/* ===== STYLE 46 id=israrlab-url-thin-css ===== */
+/* === CSS Block 46: israrlab-url-thin-css === */
 .url-code-fetch-row{
   display:flex !important;
   gap:6px !important;
@@ -3436,8 +3387,7 @@ body.subview-active #htmlDivideFullView{
   z-index:1000099 !important;
 }
 
-
-/* ===== STYLE 47 id=israrlab-course-btns-css ===== */
+/* === CSS Block 47: israrlab-course-btns-css === */
 #courseFullView .course-full-header{
   display:grid !important;
   grid-template-columns:1fr 1fr 1fr !important;
@@ -3471,8 +3421,7 @@ body.subview-active #htmlDivideFullView{
 }
 #courseFullView .course-full-header .pv-btn i{font-size:11px !important;margin-right:4px !important;}
 
-
-/* ===== STYLE 48 id=israrlab-four-btn-url-css ===== */
+/* === CSS Block 48: israrlab-four-btn-url-css === */
 .html-divide-action-row{
   display:grid !important;
   grid-template-columns:1fr 1fr 1fr 1fr !important;
@@ -3541,8 +3490,7 @@ body.subview-active #htmlDivideFullView{
 .url-code-stage.is-previewing #urlCodeOutput{display:none !important;}
 .url-code-stage.is-previewing #urlCodePreviewFrame{display:block !important;}
 
-
-/* ===== STYLE 49 id=israrlab-url-height-css ===== */
+/* === CSS Block 49: israrlab-url-height-css === */
 #urlCodeOutput{
   min-height:550px !important;
   height:550px !important;
@@ -3571,8 +3519,7 @@ body.subview-active #htmlDivideFullView{
 /* old full-width back removed */
 #htmlDividePreviewView .hdf-header .pv-back i{margin-right:6px;}
 
-
-/* ===== STYLE 50 id=israrlab-preview-cat-perf-css ===== */
+/* === CSS Block 50: israrlab-preview-cat-perf-css === */
 /* Preview: ONLY small back — never full-width fat bar */
 #htmlDividePreviewView .html-divide-preview-header{
   display:flex !important;
@@ -3638,8 +3585,7 @@ body.subview-active #htmlDivideFullView{
   background:#fff !important;
 }
 
-
-/* ===== STYLE 51 id=israrlab-tab-glow-css ===== */
+/* === CSS Block 51: israrlab-tab-glow-css === */
 /* Default HTML Divide tabs = plain (no fill color) */
 #panel-html-divide .divide-mode-tab,
 .divide-mode-tab{
@@ -3679,8 +3625,7 @@ body.light-mode .divide-mode-tab.tab-visited{
   outline: none !important;
 }
 
-
-/* ===== STYLE 52 id=israrlab-final-fixes-css ===== */
+/* === CSS Block 52: israrlab-final-fixes-css === */
 /* Hide nested Code Divide pane — full page opens instead */
 #divideModeDivide .html-divide-label,
 #divideModeDivide .divide-editor-shell,
@@ -4077,8 +4022,7 @@ body.light-mode #urlCodeFullView #urlCodeFullOutput::selection{
 #categoryNotesLive .card-footer-row{display:grid!important;grid-template-columns:1fr 1fr!important;gap:5px!important;}
 #categoryNotesLive .card-footer-row button{height:30px!important;font-size:10px!important;border-radius:7px!important;width:100%!important;min-width:0!important;}
 
-
-/* ===== STYLE 53 id=israrlab-category-home-match-css ===== */
+/* === CSS Block 53: israrlab-category-home-match-css === */
 /* Category cards = Home cards (same scaled preview) */
 #categoryNotesLive{
   display:grid !important;
@@ -4167,8 +4111,7 @@ body.light-mode #urlCodeFullView #urlCodeFullOutput::selection{
   #categoryNotesLive .card-footer-row button{height:28px !important; font-size:10px !important;}
 }
 
-
-/* ===== STYLE 54 id=israrlab-category-preview-click-css ===== */
+/* === CSS Block 54: israrlab-category-preview-click-css === */
 /* Category mini preview interactive like Home — full preview only via Preview button */
 #categoryNotesLive .card-cover-box{
   cursor: default !important;
@@ -4189,15 +4132,13 @@ body.light-mode #urlCodeFullView #urlCodeFullOutput::selection{
   pointer-events: auto !important;
 }
 
-
-/* ===== STYLE 55 id=israrlab-cm-wordwrap-global-v1 ===== */
+/* === CSS Block 55: israrlab-cm-wordwrap-global-v1 === */
 /* GLOBAL CodeMirror word-wrap enforcement — no horizontal scroll */
 .CodeMirror-scroll{overflow-x:hidden!important;overflow-y:auto!important;max-width:100%!important;}
 .CodeMirror pre.CodeMirror-line,.CodeMirror pre.CodeMirror-line-like{white-space:pre-wrap!important;word-break:break-word!important;overflow-wrap:break-word!important;}
 .CodeMirror-sizer,.CodeMirror-lines{max-width:100%!important;}
 
-
-/* ===== STYLE 56 id=israrlab-cm-colors-and-ui-fix-v1 ===== */
+/* === CSS Block 56: israrlab-cm-colors-and-ui-fix-v1 === */
 /* CodeMirror syntax colors — light mode (visible on white) */
 body.light-mode .CodeMirror .cm-tag { color: #0550ae !important; }
 body.light-mode .CodeMirror .cm-attribute { color: #953800 !important; }
