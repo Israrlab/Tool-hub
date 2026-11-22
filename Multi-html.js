@@ -1,10 +1,7 @@
-/* IsrarLab Multi HTML Viewer - App JS */
-/* IMPORTANT: Is file ko HTML file ke SAATH same folder me rakho */
-/* Example: /website/israrlab_multi_html_viewer.html  +  /website/israrlab-app.js */
 
+/* ===== Original inline script at source offset 1474 ===== */
 
-/* ===== SCRIPT 1 ===== */
-//<![CDATA[
+  //<![CDATA[
   (function() {
     var url = window.location.href;
     if (url.indexOf("?m=1") !== -1 || url.indexOf("&m=1") !== -1) {
@@ -16,7 +13,10 @@
   //]]>
 
 
-/* ===== SCRIPT 2 ===== */
+
+/* ===== Original inline script at source offset 138504 ===== */
+
+
 /* ========== PERSISTENT STORAGE (IndexedDB + localStorage) ========== */
 const ISRAR_DB_NAME = 'IsrarLabMultiHtmlViewerDB';
 const ISRAR_DB_STORE = 'appdata';
@@ -4205,7 +4205,9 @@ function renderRelatedActivity(){}
 window.setRelatedMode = setRelatedMode;
 
 
-/* ===== SCRIPT 3 ===== */
+
+/* ===== Original inline script at source offset 313879 ===== */
+
 (function(){
   /* Fast editor: never highlight on every keystroke. Colors paint after idle. */
   var paintQueued = false;
@@ -4348,7 +4350,9 @@ window.setRelatedMode = setRelatedMode;
 })();
 
 
-/* ===== SCRIPT 4 id=final-full-paste-and-scroll-sync ===== */
+
+/* ===== Original inline script at source offset 326381 ===== */
+
 (function(){
  function bindEditorFix(){
   const ta=document.getElementById('htmlCodeInput');
@@ -4376,7 +4380,9 @@ window.setRelatedMode = setRelatedMode;
 })();
 
 
-/* ===== SCRIPT 5 id=israrlab-search-highlight-persistence-fix ===== */
+
+/* ===== Original inline script at source offset 334938 ===== */
+
 (function(){
   function getNodes(root){
     const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(n){return n.nodeValue&&n.nodeValue.length?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;}});
@@ -4461,7 +4467,9 @@ window.setRelatedMode = setRelatedMode;
 })();
 
 
-/* ===== SCRIPT 6 id=final-editor-actions-fix ===== */
+
+/* ===== Original inline script at source offset 343725 ===== */
+
 (function(){
   const ta=()=>document.getElementById('htmlCodeInput');
   let historyStack=[],historyIndex=-1,lastValue=null,restoring=false;
@@ -4490,7 +4498,9 @@ window.setRelatedMode = setRelatedMode;
 })();
 
 
-/* ===== SCRIPT 7 id=final-cursor-and-scroll-alignment-fix ===== */
+
+/* ===== Original inline script at source offset 358619 ===== */
+
 (function(){
  function align(){
   const ta=document.getElementById('htmlCodeInput');
@@ -4515,7 +4525,9 @@ window.setRelatedMode = setRelatedMode;
 })();
 
 
-/* ===== SCRIPT 8 id=requested-save-return-home-fix ===== */
+
+/* ===== Original inline script at source offset 361986 ===== */
+
 function saveAndReturnHome(){
   var ok = false;
   try { ok = executeAutoSave(); } catch (e) { console.error(e); }
@@ -4555,7 +4567,9 @@ function saveAndReturnHome(){
 }
 
 
-/* ===== SCRIPT 9 id=final-darkmode-home-reapply-fix ===== */
+
+/* ===== Original inline script at source offset 368006 ===== */
+
 (function(){
   /* Re-apply dark/light every time home is shown + on load */
   function reapply(){
@@ -4593,7 +4607,9 @@ function saveAndReturnHome(){
 })();
 
 
-/* ===== SCRIPT 10 id=final-layout-sort-sync-fix ===== */
+
+/* ===== Original inline script at source offset 369317 ===== */
+
 (function(){
   function syncLayoutStatus(){
     try{
@@ -4612,7 +4628,9 @@ function saveAndReturnHome(){
 })();
 
 
-/* ===== SCRIPT 11 id=ultimate-persist-and-pagination-fix ===== */
+
+/* ===== Original inline script at source offset 373400 ===== */
+
 (function(){
   function persistNow(){
     try { if (typeof saveData === 'function') saveData(); } catch(e) {}
@@ -4633,7 +4651,9 @@ function saveAndReturnHome(){
 })();
 
 
-/* ===== SCRIPT 12 id=line-scroll-raf-bind ===== */
+
+/* ===== Original inline script at source offset 398057 ===== */
+
 (function(){
   function bind(){
     var ta = document.getElementById('htmlCodeInput');
@@ -4655,7 +4675,9 @@ function saveAndReturnHome(){
 })();
 
 
-/* ===== SCRIPT 13 id=editor-hscroll-sync ===== */
+
+/* ===== Original inline script at source offset 401299 ===== */
+
 (function(){
   function bind(){
     var ta = document.getElementById('htmlCodeInput');
@@ -4677,7 +4699,9 @@ function saveAndReturnHome(){
 })();
 
 
-/* ===== SCRIPT 14 id=codemirror-editor-bootstrap ===== */
+
+/* ===== Original inline script at source offset 404374 ===== */
+
 (function(){
   var cmInstance = null;
   var cmReady = false;
@@ -4922,7 +4946,9 @@ function saveAndReturnHome(){
 })();
 
 
-/* ===== SCRIPT 15 id=israrlab-repaired-multiple-html ===== */
+
+/* ===== Original inline script at source offset 429234 ===== */
+
 (function(){
   var STORE='israrlab_multiple_html_windows_repaired_v1';
   function cards(){return Array.prototype.slice.call(document.querySelectorAll('#windowCodeWorkspace .window-code-card'));}
@@ -4980,7 +5006,9 @@ function saveAndReturnHome(){
 })();
 
 
-/* ===== SCRIPT 16 id=israrlab-learning-library ===== */
+
+/* ===== Original inline script at source offset 436986 ===== */
+
 (function(){
   var practice=[], courses=[], activeDetail=null;
   var practiceBases=[
@@ -5147,7 +5175,9 @@ function saveAndReturnHome(){
 })();
 
 
-/* ===== SCRIPT 17 id=israrlab-preview-horizontal-fix ===== */
+
+/* ===== Original inline script at source offset 461931 ===== */
+
 (function(){
   function fixPreviewLayout(){
     var pane=document.getElementById('windowPreviewPane');
@@ -5166,7 +5196,9 @@ function saveAndReturnHome(){
 })();
 
 
-/* ===== SCRIPT 18 id=israrlab-window-preview-selector ===== */
+
+/* ===== Original inline script at source offset 462809 ===== */
+
 (function(){
   var currentPreviewIndex=0;
   function getCards(){
@@ -5232,7 +5264,9 @@ function saveAndReturnHome(){
 })();
 
 
-/* ===== SCRIPT 19 id=israrlab-url-code-course-controller ===== */
+
+/* ===== Original inline script at source offset 466346 ===== */
+
 (function(){
 'use strict';
 function el(id){return document.getElementById(id)}
@@ -5381,7 +5415,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 20 id=israrlab-multi-html-hard-fix ===== */
+
+/* ===== Original inline script at source offset 483821 ===== */
+
 (function(){
   function cards(){return Array.prototype.slice.call(document.querySelectorAll('#windowCodeWorkspace .window-code-card'));}
   function read(card){
@@ -5546,7 +5582,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 21 id=israrlab-course-full-js ===== */
+
+/* ===== Original inline script at source offset 496448 ===== */
+
 (function(){
   function el(id){return document.getElementById(id);}
   window.openCourseFullView=function(tab){
@@ -5607,7 +5645,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 22 id=israrlab-divide-editor-boot ===== */
+
+/* ===== Original inline script at source offset 501096 ===== */
+
 (function(){
   var divideEditor=null;
   function initDivideEditor(){
@@ -5666,7 +5706,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 23 id=israrlab-gen-preview-js ===== */
+
+/* ===== Original inline script at source offset 505758 ===== */
+
 (function(){
   /* moved */
 
@@ -5708,7 +5750,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 24 id=israrlab-divide3-url-multi-js ===== */
+
+/* ===== Original inline script at source offset 511488 ===== */
+
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); else console.log(m);}catch(e){} }
@@ -5870,7 +5914,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 25 id=israrlab-full-cut-url-js ===== */
+
+/* ===== Original inline script at source offset 521330 ===== */
+
 (function(){
   function el(id){return document.getElementById(id);}
   function toast(m){try{if(typeof showToast==='function')showToast(m);}catch(e){}}
@@ -5927,7 +5973,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 26 id=israrlab-url-reset-save-cut-js ===== */
+
+/* ===== Original inline script at source offset 524456 ===== */
+
 (function(){
   function el(id){return document.getElementById(id);}
   function toast(m){try{if(typeof showToast==='function')showToast(m);}catch(e){console.log(m);}}
@@ -6069,7 +6117,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 27 id=israrlab-preview-cat-fix-js ===== */
+
+/* ===== Original inline script at source offset 531812 ===== */
+
 (function(){
   function el(id){return document.getElementById(id);}
   function toast(m){try{if(typeof showToast==='function')showToast(m);}catch(e){}}
@@ -6191,7 +6241,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 28 id=israrlab-final-fixes-js ===== */
+
+/* ===== Original inline script at source offset 563224 ===== */
+
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){} }
@@ -7441,7 +7493,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 29 id=israrlab-preview-buttons-fix ===== */
+
+/* ===== Original inline script at source offset 619669 ===== */
+
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){ try{ alert(m); }catch(e2){} } }
@@ -7657,7 +7711,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 30 id=israrlab-category-final-fix ===== */
+
+/* ===== Original inline script at source offset 628943 ===== */
+
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){} }
@@ -7853,7 +7909,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 31 id=israrlab-cdf-preview-final-fix ===== */
+
+/* ===== Original inline script at source offset 638819 ===== */
+
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){
@@ -7884,11 +7942,13 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
         else doc = '<style id="israr-cut-css">\n'+css+'\n</style>\n' + doc;
       }
       if(js){
-        if(/<\/body>/i.test(doc)) doc = doc.replace(/<\/body>/i, '<script id="israr-cut-js">\n'+js+'\n</'+'script>\n</body>');
-        else doc = doc + '\n<script id="israr-cut-js">\n'+js+'\n</'+'script>';
+        if(/<\/body>/i.test(doc)) doc = doc.replace(/<\/body>/i, '<script id="israr-cut-js">\n'+js+'\n<\/script>\n</body>');
+        else doc = doc + '\n<script id="israr-cut-js">\n'+js+'\n<\/script>';
       }
     } else {
-      doc = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style id="israr-cut-css">\n'+css+'\n</style></head><body>\n'+html+'\n<script id="israr-cut-js">\n'+js+'\n</'+'script></body></html>';
+      doc = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+        + '<style id="israr-cut-css">\n' + css + '\n</style></head><body>\n'
+        + html + '\n<script id="israr-cut-js">\n' + js + '\n<\/script>\n</body></html>';
     }
     return doc;
   }
@@ -8099,7 +8159,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 32 id=israrlab-url-html-source-fix ===== */
+
+/* ===== Original inline script at source offset 647788 ===== */
+
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){} }
@@ -8317,7 +8379,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 33 id=israrlab-cdf-preview-generate-final-v5 ===== */
+
+/* ===== Original inline script at source offset 655212 ===== */
+
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){} }
@@ -8814,7 +8878,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 34 id=israrlab-multiple-html-host-v4 ===== */
+
+/* ===== Original inline script at source offset 681536 ===== */
+
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){} }
@@ -9269,7 +9335,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 35 id=israrlab-cdf-source-codemirror-v1 ===== */
+
+/* ===== Original inline script at source offset 702279 ===== */
+
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){} }
@@ -9466,7 +9534,9 @@ window.copyFetchedUrlCode=async function(){var out=el('urlCodeOutput'),status=el
 })();
 
 
-/* ===== SCRIPT 36 id=israrlab-url-code-codemirror-v1 ===== */
+
+/* ===== Original inline script at source offset 722571 ===== */
+
 (function(){
   function el(id){ return document.getElementById(id); }
   function toast(m){ try{ if(typeof showToast==='function') showToast(m); }catch(e){} }
