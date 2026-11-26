@@ -818,19 +818,3 @@
   updateURLState();
   renderPage();
 })();
-</script>
-<script>
-setTimeout(function(){
-  var A=String.fromCharCode(38);
-  var H=String.fromCharCode(35);
-  var S=String.fromCharCode(59);
-  function fix(n){
-    if(n.nodeType===3){
-      if(n.nodeValue.indexOf(A)!==-1){
-        n.nodeValue=n.nodeValue.replace(new RegExp(A+'amp;'+H+'([0-9]+)'+S,'g'),function(m,c){return String.fromCharCode(c);}).replace(new RegExp(A+H+'([0-9]+)'+S,'g'),function(m,c){return String.fromCharCode(c);});
-      }
-    }else{for(var i=0;i<n.childNodes.length;i++){fix(n.childNodes[i]);}}
-  }
-  fix(document.body);
-  setInterval(function(){fix(document.body);},800);
-},500);
